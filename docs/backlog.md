@@ -28,8 +28,30 @@ device; Netlify stores only ciphertext.
   - STAMP stops being static files only. It gains one server function, still with
     no accounts or tracking.
 
-**Before building:** discuss the passphrase rules, when automatic backups run,
-and what restore does to data already on the device (replace vs. merge).
+**Before building, settle with the owner:**
+1. Minimum passphrase strength.
+2. Automatic backup after changes (and how often), or a button only.
+3. What restore does on a device that already has data: replace or merge.
+
+**Estimate:** one working session, roughly an hour or two from go-ahead to
+deployed, plus the owner's phone check. About 200–300 new lines:
+
+| Piece | Effort |
+|---|---|
+| Netlify Function: save and load one ciphertext per vault in Blobs | Small, ~50 lines |
+| Client crypto: passphrase → key → encrypt/decrypt (WebCrypto) | Small to medium; must be exactly right |
+| BACKUP TO CLOUD on REVIEW: passphrase, back up, restore, last-backup time | Medium, mostly states and errors |
+| Deploy changes | Small, but new to this repo |
+| Testing: restore on a fresh origin, wrong passphrase, offline, large text | Most of the time |
+
+**What it changes beyond code:**
+- **First dependency.** The function needs `@netlify/blobs`, so the repo gains a
+  `package.json`. The staged deploy in CLAUDE.md must also upload the function
+  (`--functions`), not just the app files.
+- **Abuse protection.** The endpoint is public, so anyone could try to store
+  junk. Cap the size and reject anything that isn't shaped like ciphertext.
+- **Testing** happens locally with `netlify dev`, then on the live site. There
+  is no staging environment.
 
 ## Clean up shipping files
 
