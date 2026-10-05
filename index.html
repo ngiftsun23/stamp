@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STAMP</title>
+<meta name="description" content="Local-first habit tracker. One tap to stamp.">
+<meta name="theme-color" content="#FFE14A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>
+:root{
+  --page:#F3EFE4; --card:#FFFDF8; --ink:#111;
+  --yellow:#FFE14A; --pink:#FF5C8A; --lime:#C6F54A; --sky:#7AD7FF; --orange:#FF8A3D;
+  --skip:#BDB4A3; --skipbg:#E4DDCF; --line:#D6CEBE; --muted:#4A463F;
+  --b:3px solid #111; --sh:5px 5px 0 #111;
+  --display:'Archivo Black','Arial Black',Impact,sans-serif;
+  --ui:'Space Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+*{box-sizing:border-box;border-radius:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;height:100%}
+body{background:var(--page);color:var(--ink);font:500 1rem/1.4 var(--ui);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+
+#app{height:100dvh;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--page)}
+@media (min-width:530px){#app{border-left:var(--b);border-right:var(--b)}}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--yellow);border-bottom:var(--b);
+  padding:max(.6rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) .6rem max(1rem,env(safe-area-inset-left))}
+.mark{font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--ink);color:var(--yellow);padding:.35rem .55rem}
+.top .meta{text-align:right}
+
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem max(1rem,env(safe-area-inset-right)) 2rem max(1rem,env(safe-area-inset-left))}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:var(--b);background:var(--card);padding-bottom:env(safe-area-inset-bottom)}
+.tabs a{min-height:3.4rem;display:grid;place-items:center;font:min(1rem,4.4vw)/1 var(--display);color:var(--ink);text-decoration:none;border-right:var(--b);padding:.5rem .25rem;letter-spacing:.02em}
+.tabs a:last-child{border-right:0}
+.tabs a[aria-current="page"]{background:var(--ink);color:var(--yellow)}
+
+h1{font:2rem/1 var(--display);text-transform:uppercase;margin:.25rem 0 .9rem;letter-spacing:-.01em;overflow-wrap:anywhere}
+h2{font:1.1rem/1.1 var(--display);text-transform:uppercase;margin:0 0 .75rem}
+p{margin:.4rem 0}
+.meta,.lab{font:500 .78rem/1.35 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.lab{display:block;margin-bottom:.35rem}
+.muted{color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+.spread{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between}
+
+.card{background:var(--card);border:var(--b);box-shadow:var(--sh);padding:1rem;margin:0 5px 1.25rem 0}
+
+.btn{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  min-height:44px;min-width:44px;padding:.65rem 1rem;font:1rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em;
+  background:var(--card);color:var(--ink);border:var(--b);box-shadow:var(--sh);cursor:pointer;text-decoration:none;text-align:center;
+  transition:transform 60ms linear,box-shadow 60ms linear;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn.ink{background:var(--ink);color:var(--card)}
+.btn.y{background:var(--yellow)}
+.btn.pink{background:var(--pink)}
+.btn.sm{font-size:.85rem;padding:.5rem .7rem}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btns{display:flex;flex-wrap:wrap;gap:.75rem;padding:0 5px 5px 0}
+
+/* TODAY */
+.datehead{margin-bottom:1rem}
+.datehead h1{font-size:min(2.3rem,10.5vw);margin:0;overflow-wrap:normal}
+.prog{display:flex;align-items:center;gap:.75rem;margin:.75rem 5px 1.25rem 0}
+.bar{flex:1;height:1.4rem;border:var(--b);background:var(--card);box-shadow:var(--sh)}
+.bar i{display:block;height:100%;background:var(--ink)}
+.count{font:1.4rem/1 var(--display);white-space:nowrap}
+.banner{background:var(--pink);border:var(--b);box-shadow:var(--sh);padding:.9rem 1rem;margin:0 5px 1.25rem 0}
+.banner h2{margin-bottom:.35rem}
+.hcard{border-top-width:14px;border-top-color:var(--c)}
+.hcard.is-done{background:var(--c)}
+.hcard.is-skip{background:var(--skipbg)}
+.hname{display:block;width:100%;min-height:44px;background:none;border:0;padding:0;text-align:left;cursor:pointer;
+  font:1.4rem/1.1 var(--display);text-transform:uppercase;overflow-wrap:anywhere;transition:transform 60ms linear}
+.hname::after{content:"\203A" / "";margin-left:.4em}
+.hname:active{transform:translate(3px,3px)}
+.cue{font:500 .95rem/1.35 var(--ui);margin:.25rem 0}
+.cue b{font:600 .72rem/1 var(--mono);letter-spacing:.05em;background:var(--ink);color:var(--card);padding:.15rem .35rem;margin-right:.35rem;vertical-align:.12em}
+.stats{display:flex;flex-wrap:wrap;gap:.5rem;margin:.8rem 0 1rem}
+.stats div{flex:1 1 5.5rem;border:var(--b);background:var(--card);padding:.35rem .55rem}
+.stats dt{font:500 .68rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.stats dd{margin:.15rem 0 0;font:1.35rem/1.05 var(--display)}
+.note{font:500 .85rem/1.35 var(--mono);border-left:var(--b);padding-left:.6rem;margin:.6rem 0 .9rem;overflow-wrap:anywhere;white-space:pre-wrap}
+.acts{display:flex;flex-wrap:wrap;gap:.75rem;padding:0 5px 5px 0}
+.acts .stamp{flex:2 1 9rem;font-size:1.25rem;min-height:3.4rem;background:var(--c)}
+.hcard.is-done .acts .stamp{background:var(--ink);color:var(--card)}
+.acts .btn:not(.stamp){flex:1 1 5rem}
+.hcard.is-skip .acts [data-act="skip"]{background:var(--ink);color:var(--card)}
+.undo{margin:.6rem 0 0}
+.later{margin-top:.5rem}
+
+/* HABITS */
+.hrow .hname{font-size:1.2rem}
+.hrow{border-left-width:14px;border-left-color:var(--c)}
+.warn{background:var(--orange)}
+details.arch summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font:1rem/1 var(--display);text-transform:uppercase;list-style:none}
+details.arch summary::-webkit-details-marker{display:none}
+details.arch summary::before{content:"+";display:inline-grid;place-items:center;width:1.6rem;height:1.6rem;border:var(--b);margin-right:.6rem;font-size:1rem}
+details.arch[open] summary::before{content:"\2212"}
+
+/* DETAIL */
+.ident{font:700 1.05rem/1.35 var(--ui);margin:.25rem 0 .5rem}
+.hm{display:grid;grid-template-columns:auto repeat(16,minmax(0,1fr));gap:3px;align-items:center;margin:.5rem 0 .75rem}
+.hm .dl{font:500 .62rem/1 var(--mono);padding-right:.3rem;text-align:right}
+.hm .mo{font:600 .6rem/1 var(--mono);white-space:nowrap;overflow:visible;height:1em;text-transform:uppercase}
+.cell{aspect-ratio:1;min-width:0;width:100%;padding:0;margin:0;border:2px solid var(--ink);background:var(--card);cursor:pointer;display:block}
+.cell.done,.cell.extra{background:var(--ink)}
+.cell.miss{background:var(--pink)}
+.cell.skip{background:var(--skip)}
+.cell.pause{border-style:dashed}
+.cell.off{border-color:var(--line)}
+.cell.pre,.cell.future{border-color:transparent;background:transparent;cursor:default}
+.cell.today{outline:3px solid var(--ink);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.legend .cell{width:.9rem;height:.9rem;display:inline-block;cursor:default}
+.notes{list-style:none;margin:0;padding:0}
+.notes li{border-top:2px solid var(--line);padding:.55rem 0}
+.notes li:first-child{border-top:0}
+
+/* FORMS */
+.fld{display:block;margin-bottom:1.1rem}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;min-height:44px;padding:.65rem .75rem;border:var(--b);background:var(--card);font:500 1rem/1.35 var(--ui);border-radius:0;-webkit-appearance:none;appearance:none}
+textarea{min-height:6rem;resize:vertical}
+select{background-image:none;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:.6rem;padding:0 5px 5px 0}
+.chip{position:relative;display:inline-block}
+.chip input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.chip span{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0 .75rem;border:var(--b);background:var(--card);box-shadow:var(--sh);font:.95rem/1 var(--display);text-transform:uppercase}
+.chip input:checked+span{background:var(--ink);color:var(--yellow)}
+.chip input:focus-visible+span{outline:3px dashed var(--ink);outline-offset:3px}
+.chip input:active+span{transform:translate(3px,3px);box-shadow:none}
+.swatch span{width:3rem;background:var(--c)}
+.swatch input:checked+span{background:var(--c);outline:3px solid var(--ink);outline-offset:3px;color:var(--ink)}
+.sched-days,.sched-times{display:none;margin-top:.9rem}
+.edit:has(#f-weekdays:checked) .sched-days{display:block}
+.edit:has(#f-weekly:checked) .sched-times{display:block}
+.stepper{display:flex;align-items:center;gap:.75rem;padding:0 5px 5px 0}
+.stepper output{font:1.8rem/1 var(--display);min-width:2.2rem;text-align:center}
+
+/* REVIEW */
+.srow{margin-bottom:.9rem}
+.srow .nm{font:1rem/1.15 var(--display);text-transform:uppercase;overflow-wrap:anywhere}
+.sline{display:flex;align-items:center;gap:.6rem;margin-top:.3rem}
+.sbar{flex:1;height:1.15rem;border:var(--b);background:var(--card)}
+.sbar i{display:block;height:100%;background:var(--c);border-right:3px solid var(--ink)}
+.sbar i[style*="width:0%"]{border-right:0}
+.sval{font:1.15rem/1 var(--display);min-width:2.6ch;text-align:right}
+
+/* QUIT habits */
+.qstate{display:inline-block;font:600 .78rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.05em;border:var(--b);padding:.3rem .5rem;margin:0 0 .5rem}
+.qstate.clean{background:var(--lime)}
+.qstate.slip{background:var(--pink)}
+.qitems{margin:.25rem 0 1rem}
+.qrow{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;border-top:2px solid var(--line);padding:.6rem 5px .6rem 0}
+.qrow:first-child{border-top:0}
+.qrow .qn{flex:1 1 6.5rem;font:1rem/1.15 var(--display);text-transform:uppercase;overflow-wrap:anywhere}
+.qrow .qctl{display:flex;align-items:center;gap:.6rem}
+.qrow .qc{font:1.5rem/1 var(--display);min-width:2ch;text-align:center}
+.qblock{border-top:2px solid var(--line);padding:.6rem 0}
+.qblock:first-child{border-top:0;padding-top:0}
+.qblock.total{border-top:3px solid var(--ink)}
+.qbn{font:1rem/1.15 var(--display);text-transform:uppercase;overflow-wrap:anywhere;margin-bottom:.35rem}
+.qnums{display:flex;flex-wrap:wrap;gap:.35rem 1rem;margin:0}
+.qnums div{display:flex;align-items:baseline;gap:.35rem}
+.qnums dt{font:500 .7rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.qnums dd{margin:0;font:1.05rem/1 var(--display)}
+.itemrow{display:flex;gap:.6rem;margin-bottom:.6rem;padding-right:5px}
+.itemrow input{flex:1;min-width:0}
+.only-avoid{display:none}
+.edit:has(#k-avoid:checked) .only-avoid{display:block}
+.edit:has(#k-avoid:checked) .only-do{display:none}
+
+/* SHEET + TOAST */
+dialog{border:var(--b);box-shadow:var(--sh);background:var(--card);color:var(--ink);padding:1rem;width:min(480px,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto}
+dialog::backdrop{background:#111;opacity:.55}
+.toast{position:fixed;left:50%;bottom:calc(4.6rem + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;
+  width:min(480px,calc(100vw - 2rem));background:var(--yellow);border:var(--b);box-shadow:var(--sh);padding:.8rem 1rem;
+  font:1rem/1.25 var(--display);text-transform:uppercase;display:none}
+.toast.on{display:block}
+.empty p{font-size:1.05rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <span class="mark">STAMP</span>
+    <span class="meta" id="hdate"></span>
+  </header>
+  <main id="view" tabindex="-1"></main>
+  <nav class="tabs" aria-label="Sections">
+    <a href="#today" data-tab="today">TODAY</a>
+    <a href="#habits" data-tab="habits">HABITS</a>
+    <a href="#review" data-tab="review">REVIEW</a>
+  </nav>
+</div>
+<dialog id="sheet"></dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<noscript><p style="padding:1rem">STAMP needs JavaScript.</p></noscript>
+
+<script>
+'use strict';
+
+/* ---------- constants ---------- */
+const KEY = 'stamp-habits-v1';
+const HINT_KEY = 'stamp-install-hint-dismissed';
+const ACCENTS = ['#FFE14A', '#FF5C8A', '#C6F54A', '#7AD7FF', '#FF8A3D'];
+const ACCENT_NAMES = ['Yellow', 'Pink', 'Lime', 'Sky', 'Orange'];
+const DAY_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+const MILESTONES = [7, 30, 100];
+const SOFT_CAP = 7;
+const BAD_IDS = new Set(['__proto__', 'constructor', 'prototype']);
+
+/* ---------- dates (local, YYYY-MM-DD, ISO weeks start Monday) ---------- */
+const pad = n => String(n).padStart(2, '0');
+const keyOf = dt => `${dt.getFullYear()}-${pad(dt.getMonth() + 1)}-${pad(dt.getDate())}`;
+const parse = s => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d, 12); };
+const addDays = (s, n) => { const d = parse(s); d.setDate(d.getDate() + n); return keyOf(d); };
+const dow = s => ((parse(s).getDay() + 6) % 7) + 1; // 1 = Mon … 7 = Sun
+const monday = s => addDays(s, 1 - dow(s));
+const daysBetween = (a, b) => Math.round((parse(b) - parse(a)) / 864e5); // b - a
+const isDate = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && keyOf(parse(s)) === s;
+const fmt = (s, o) => parse(s).toLocaleDateString('en-GB', o).toUpperCase();
+
+function todayKey() {
+  const now = new Date();
+  if (now.getHours() < db.settings.boundary) now.setDate(now.getDate() - 1);
+  return keyOf(now);
+}
+
+/* ---------- utils ---------- */
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const str = (v, max) => typeof v === 'string' ? v.trim().slice(0, max) : '';
+const clampInt = (v, lo, hi, dflt) => { const n = Math.round(Number(v)); return Number.isFinite(n) ? Math.min(hi, Math.max(lo, n)) : dflt; };
+const validId = s => typeof s === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(s) && !BAD_IDS.has(s);
+const own = (o, k) => o && typeof o === 'object' && Object.prototype.hasOwnProperty.call(o, k);
+
+/* ---------- storage ---------- */
+function normalize(raw) {
+  if (!raw || typeof raw !== 'object' || !Array.isArray(raw.habits)) throw new Error('Expected an object with a "habits" array.');
+  const out = { v: 1, habits: [], logs: {}, settings: { boundary: clampInt(raw.settings?.boundary, 0, 6, 0) } };
+  const seen = new Set();
+  const fallbackDay = keyOf(new Date());
+  raw.habits.forEach((x, i) => {
+    if (!x || typeof x !== 'object' || !str(x.name, 60)) return;
+    const oldId = x.id;
+    let id = validId(oldId) && !seen.has(oldId) ? oldId : uid() + i;
+    seen.add(id);
+    const days = Array.isArray(x.days) ? [...new Set(x.days.map(Number).filter(n => Number.isInteger(n) && n >= 1 && n <= 7))].sort() : [];
+    let freq = ['daily', 'weekdays', 'weekly'].includes(x.freq) ? x.freq : 'daily';
+    if (freq === 'weekdays' && !days.length) freq = 'daily';
+    const pausedUntil = isDate(x.pausedUntil) ? x.pausedUntil : null;
+    let pauses = Array.isArray(x.pauses) ? x.pauses.filter(p => Array.isArray(p) && isDate(p[0]) && isDate(p[1]) && p[0] <= p[1]).map(p => [p[0], p[1]]) : [];
+    if (pausedUntil && !pauses.some(p => p[1] === pausedUntil)) pauses.push([addDays(pausedUntil, -6), pausedUntil]);
+    const color = typeof x.color === 'string' ? x.color.toUpperCase() : '';
+    const kind = x.kind === 'avoid' ? 'avoid' : 'do';
+    const itemIds = new Set();
+    const items = (Array.isArray(x.items) ? x.items : []).filter(it => it && validId(it.id) && str(it.name, 40) && !itemIds.has(it.id) && itemIds.add(it.id))
+      .map(it => ({ id: it.id, name: str(it.name, 40) }));
+    if (kind === 'avoid' && !items.length) items.push({ id: 'i1', name: str(x.name, 40) });
+    out.habits.push({
+      id, kind, name: str(x.name, 60), identity: str(x.identity, 140), cue: str(x.cue, 100), two: str(x.two, 100),
+      freq: kind === 'avoid' ? 'daily' : freq, days: days.length ? days : [1, 2, 3, 4, 5], times: clampInt(x.times, 1, 6, 3),
+      color: ACCENTS.includes(color) ? color : ACCENTS[i % ACCENTS.length],
+      created: isDate(x.created) ? x.created : fallbackDay,
+      archived: !!x.archived, pausedUntil, pauses, items, toasted: str(x.toasted, 20),
+    });
+    const src = typeof oldId === 'string' && own(raw.logs, oldId) ? raw.logs[oldId] : null;
+    const dst = out.logs[id] = {};
+    if (src && typeof src === 'object') {
+      for (const [d, v] of Object.entries(src)) {
+        if (!isDate(d) || !v || typeof v !== 'object') continue;
+        const e = {};
+        if (v.s === 'done' || v.s === 'skip') e.s = v.s;
+        if (typeof v.n === 'string' && v.n.trim()) e.n = v.n.slice(0, 500);
+        if (v.c && typeof v.c === 'object') {
+          const c = {};
+          for (const [k, n] of Object.entries(v.c)) if (validId(k) && Number.isInteger(n) && n > 0) c[k] = Math.min(n, 999);
+          if (Object.keys(c).length) e.c = c;
+        }
+        if (e.s || e.n || e.c) dst[d] = e;
+      }
+    }
+  });
+  return out;
+}
+
+function load() {
+  try {
+    const s = localStorage.getItem(KEY);
+    if (s) return normalize(JSON.parse(s));
+  } catch (e) { console.warn('STAMP: could not read saved data', e); }
+  return { v: 1, habits: [], logs: {}, settings: { boundary: 0 } };
+}
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(db)); }
+  catch (e) { toast('Could not save — storage is full or blocked.'); }
+}
+
+let db = load();
+
+/* ---------- habit logic ---------- */
+const getLog = (h, d) => db.logs[h.id]?.[d];
+const isPaused = (h, d) => (h.pauses || []).some(([a, b]) => d >= a && d <= b);
+const isScheduled = (h, d) => d >= h.created && (h.freq !== 'weekdays' || h.days.includes(dow(d)));
+const isWeekly = h => h.freq === 'weekly' && !isAvoid(h);
+const isAvoid = h => h.kind === 'avoid';
+const countOf = e => e?.c ? Object.values(e.c).reduce((a, n) => a + n, 0) : 0;
+
+// Day status for daily / weekday habits:
+// pre | off | extra | done | skip | pause | open | future | miss
+// Quit habits: an unlogged past day is clean ('done'), any count is a slip ('miss').
+function dayStatus(h, d, T) {
+  if (d < h.created) return 'pre';
+  if (d > T) return 'future';
+  if (isAvoid(h)) {
+    if (isPaused(h, d)) return 'pause';
+    if (countOf(getLog(h, d)) > 0) return 'miss';
+    return d === T ? 'open' : 'done';
+  }
+  const s = getLog(h, d)?.s;
+  if (isWeekly(h)) return s || (isPaused(h, d) ? 'pause' : 'off');
+  if (!isScheduled(h, d)) return s === 'done' ? 'extra' : 'off';
+  if (s) return s;
+  if (isPaused(h, d)) return 'pause';
+  return d === T ? 'open' : 'miss';
+}
+
+// Week status for N-times-per-week habits: off | success | open | frozen | miss
+function weekInfo(h, ws, T) {
+  let done = 0, skip = 0, pause = 0, elig = 0;
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(ws, i);
+    if (d < h.created) continue;
+    elig++;
+    const s = getLog(h, d)?.s;
+    if (s === 'done') done++;
+    else if (s === 'skip') skip++;
+    else if (isPaused(h, d)) pause++;
+  }
+  const quota = Math.min(h.times, elig);
+  let status;
+  if (quota === 0) status = 'off';
+  else if (done >= quota) status = 'success';
+  else if (ws === monday(T)) status = 'open';
+  else if (done + skip + pause >= quota) status = 'frozen'; // skips / pauses cover the shortfall
+  else status = 'miss';
+  return { done, quota, status };
+}
+
+function streak(h, T) {
+  let n = 0;
+  if (isWeekly(h)) {
+    for (let ws = monday(T); addDays(ws, 6) >= h.created; ws = addDays(ws, -7)) {
+      const st = weekInfo(h, ws, T).status;
+      if (st === 'success') n++;
+      else if (st === 'miss') break;
+    }
+    return n;
+  }
+  for (let d = T; d >= h.created; d = addDays(d, -1)) {
+    const st = dayStatus(h, d, T);
+    if (st === 'done') n++;
+    else if (st === 'miss') break;
+  }
+  return n;
+}
+
+function bestStreak(h, T) {
+  let run = 0, best = 0;
+  if (isWeekly(h)) {
+    for (let ws = monday(h.created); ws <= T; ws = addDays(ws, 7)) {
+      const st = weekInfo(h, ws, T).status;
+      if (st === 'success') best = Math.max(best, ++run);
+      else if (st === 'miss') run = 0;
+    }
+    return best;
+  }
+  for (let d = h.created; d <= T; d = addDays(d, 1)) {
+    const st = dayStatus(h, d, T);
+    if (st === 'done') best = Math.max(best, ++run);
+    else if (st === 'miss') run = 0;
+  }
+  return best;
+}
+
+// 0–100, last 42 days weighted 0.93^daysAgo; skips, pauses and an open today are left out.
+function strength(h, T) {
+  let got = 0, weight = 0;
+  if (isWeekly(h)) {
+    for (let k = 0; k < 7; k++) {
+      const ws = addDays(monday(T), -7 * k);
+      if (addDays(ws, 6) < h.created) break;
+      const wi = weekInfo(h, ws, T);
+      if (wi.status === 'off' || wi.status === 'frozen' || wi.status === 'open') continue;
+      const w = 0.93 ** Math.max(0, daysBetween(addDays(ws, 6), T));
+      weight += w;
+      got += w * Math.min(1, wi.done / wi.quota);
+    }
+  } else {
+    for (let i = 0; i < 42; i++) {
+      const d = addDays(T, -i);
+      if (d < h.created) break;
+      const st = dayStatus(h, d, T);
+      if (st !== 'done' && st !== 'miss') continue;
+      const w = 0.93 ** i;
+      weight += w;
+      if (st === 'done') got += w;
+    }
+  }
+  return weight ? Math.round(100 * got / weight) : null;
+}
+
+const totalDone = h => Object.values(db.logs[h.id] || {}).filter(e => e.s === 'done').length;
+const activeHabits = () => db.habits.filter(h => !h.archived);
+const findHabit = id => db.habits.find(h => h.id === id);
+const pauseEnd = (h, T) => (h.pauses || []).find(([a, b]) => T >= a && T <= b)?.[1];
+
+function missedLast(h, T) {
+  // the previous scheduled, unpaused day was a miss
+  for (let i = 1; i <= 7; i++) {
+    const st = dayStatus(h, addDays(T, -i), T);
+    if (st === 'miss') return true;
+    if (st === 'done' || st === 'skip' || st === 'pre') return false;
+  }
+  return false;
+}
+
+// Per-item totals for a quit habit between two dates (inclusive).
+function sumCounts(h, from, to) {
+  const out = { total: 0 };
+  for (const [d, e] of Object.entries(db.logs[h.id] || {})) {
+    if (d < from || d > to || !e.c) continue;
+    for (const [k, n] of Object.entries(e.c)) { out[k] = (out[k] || 0) + n; out.total += n; }
+  }
+  return out;
+}
+
+function schedText(h) {
+  if (isAvoid(h)) return 'QUITTING · ' + esc(h.items.map(it => it.name).join(', ').toUpperCase());
+  if (h.freq === 'daily') return 'EVERY DAY';
+  if (isWeekly(h)) return `${h.times}× PER WEEK`;
+  const k = h.days.join('');
+  if (k === '12345') return 'WEEKDAYS';
+  if (k === '67') return 'WEEKENDS';
+  return h.days.map(d => DAY_SHORT[d - 1]).join(' ');
+}
+
+function cueText(c) { return /^after\b/i.test(c) ? c.replace(/^after\s*(i\b)?\s*/i, '') : c; }
+function identText(s) { return /^i\s+am\b/i.test(s) ? s : `I am the kind of person who ${s}`; }
+
+/* ---------- mutations ---------- */
+function setStatus(h, d, s, note) {
+  const T = todayKey();
+  const before = streak(h, T);
+  const logs = db.logs[h.id] || (db.logs[h.id] = {});
+  const e = { ...(logs[d] || {}) };
+  if (s === undefined) { /* keep status */ } else if (s) e.s = s; else delete e.s;
+  if (note !== undefined) { const n = note.trim().slice(0, 500); if (n) e.n = n; else delete e.n; }
+  if (e.s || e.n) logs[d] = e; else delete logs[d];
+  save();
+  const after = streak(h, T);
+  if (e.s === 'done' && after > before && MILESTONES.includes(after)) {
+    const unit = isWeekly(h) ? 'WEEK' : 'DAY';
+    toast(`${after}-${unit} STREAK. ${h.identity ? identText(h.identity) + '.' : 'Keep the chain.'}`, 4200);
+  }
+  if (e.s === 'done' && navigator.vibrate) navigator.vibrate(12);
+}
+
+// Quit habits: set one day's per-item counts (and optionally its note).
+function setCounts(h, d, c, note) {
+  const logs = db.logs[h.id] || (db.logs[h.id] = {});
+  const e = { ...(logs[d] || {}) };
+  const clean = {};
+  for (const [k, n] of Object.entries(c)) if (n > 0) clean[k] = Math.min(n, 999);
+  if (Object.keys(clean).length) e.c = clean; else delete e.c;
+  if (note !== undefined) { const n = note.trim().slice(0, 500); if (n) e.n = n; else delete e.n; }
+  if (e.s || e.n || e.c) logs[d] = e; else delete logs[d];
+  save();
+}
+
+function bump(h, itemId, delta) {
+  const T = todayKey();
+  const c = { ...(getLog(h, T)?.c || {}) };
+  c[itemId] = Math.max(0, (c[itemId] || 0) + delta);
+  setCounts(h, T, c);
+  if (delta > 0 && navigator.vibrate) navigator.vibrate(12);
+}
+
+// Clean streaks grow when a day ends, not on a tap, so check milestones on render.
+function quitMilestones(T) {
+  for (const h of activeHabits()) {
+    if (!isAvoid(h) || isPaused(h, T)) continue;
+    const s = streak(h, T), mark = `${T}:${s}`;
+    if (MILESTONES.includes(s) && h.toasted !== mark) {
+      h.toasted = mark; save();
+      toast(`${s} DAYS CLEAN. ${h.identity ? identText(h.identity) + '.' : 'Keep going.'}`, 4200);
+      return;
+    }
+  }
+}
+
+function toggleToday(h, s) {
+  const T = todayKey();
+  setStatus(h, T, getLog(h, T)?.s === s ? null : s);
+}
+
+function pause7(h) {
+  const T = todayKey();
+  h.pauses = (h.pauses || []).filter(([a]) => a < T || a > addDays(T, 6));
+  h.pauses.push([T, addDays(T, 6)]);
+  h.pausedUntil = addDays(T, 6);
+  save();
+}
+
+function resume(h) {
+  const T = todayKey();
+  h.pauses = (h.pauses || []).map(([a, b]) => (T >= a && T <= b) ? [a, addDays(T, -1)] : [a, b]).filter(([a, b]) => a <= b);
+  h.pausedUntil = null;
+  save();
+}
+
+/* ---------- views ---------- */
+function statTiles(h, T) {
+  const s = streak(h, T), b = bestStreak(h, T), st = strength(h, T);
+  const u = isWeekly(h) ? 'W' : '';
+  let html = `<div><dt>${isAvoid(h) ? 'Days clean' : 'Streak'}</dt><dd>${s}${u}</dd></div><div><dt>Best</dt><dd>${b}${u}</dd></div><div><dt>Strength</dt><dd>${st ?? '—'}</dd></div>`;
+  if (isWeekly(h)) {
+    const wi = weekInfo(h, monday(T), T);
+    html = `<div><dt>This week</dt><dd>${wi.done}/${wi.quota}</dd></div>` + html;
+  }
+  return `<dl class="stats">${html}</dl>`;
+}
+
+function cueLines(h) {
+  let out = '';
+  if (isAvoid(h)) return h.cue ? `<p class="cue"><b>URGE? INSTEAD I</b>${esc(h.cue)}</p>` : '';
+  if (h.cue) out += `<p class="cue"><b>AFTER I</b>${esc(cueText(h.cue))}</p>`;
+  if (h.two) out += `<p class="cue"><b>2 MIN</b>${esc(h.two)}</p>`;
+  return out;
+}
+
+function habitCard(h, T) {
+  const L = getLog(h, T) || {};
+  const id = esc(h.id);
+  return `<article class="card hcard ${L.s ? 'is-' + L.s : ''}" style="--c:${h.color}">
+    <button class="hname" data-act="open" data-id="${id}">${esc(h.name)}</button>
+    ${cueLines(h)}
+    ${statTiles(h, T)}
+    ${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
+    <div class="acts">
+      <button class="btn stamp" data-act="stamp" data-id="${id}" aria-pressed="${L.s === 'done'}">${L.s === 'done' ? 'STAMPED' : 'STAMP'}</button>
+      <button class="btn" data-act="skip" data-id="${id}" aria-pressed="${L.s === 'skip'}">${L.s === 'skip' ? 'SKIPPED' : 'SKIP'}</button>
+      <button class="btn" data-act="note" data-id="${id}">NOTE</button>
+    </div>
+    ${L.s ? `<p class="meta undo">Tap ${L.s === 'done' ? 'STAMPED' : 'SKIPPED'} again to undo</p>` : ''}
+  </article>`;
+}
+
+// Quit habit on TODAY: nothing to tap on a good day; +1 per item when it happens, − to undo.
+function quitCard(h, T) {
+  const L = getLog(h, T) || {};
+  const n = countOf(L), id = esc(h.id);
+  return `<article class="card hcard" style="--c:${h.color}">
+    <button class="hname" data-act="open" data-id="${id}">${esc(h.name)}</button>
+    ${cueLines(h)}
+    ${statTiles(h, T)}
+    <p class="qstate ${n ? 'slip' : 'clean'}">${n ? `Today: ${n} logged. Tomorrow starts clean.` : 'Clean so far today'}</p>
+    <div class="qitems">${h.items.map(it => {
+      const c = L.c?.[it.id] || 0, iid = esc(it.id);
+      return `<div class="qrow"><span class="qn">${esc(it.name)}</span><span class="qctl">
+        <button class="btn sm" data-act="cnt" data-id="${id}" data-item="${iid}" data-delta="-1" aria-label="One less ${esc(it.name)}" ${c ? '' : 'disabled'}>−</button>
+        <span class="qc" aria-label="${c} today">${c}</span>
+        <button class="btn sm" data-act="cnt" data-id="${id}" data-item="${iid}" data-delta="1" aria-label="Log one ${esc(it.name)}">+1</button></span></div>`;
+    }).join('')}</div>
+    ${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
+    <div class="acts"><button class="btn" data-act="note" data-id="${id}">NOTE</button></div>
+  </article>`;
+}
+
+// Per-item table: today / this week / last week / 30 days.
+function countsTable(h, T) {
+  const ws = monday(T);
+  const cols = [sumCounts(h, T, T), sumCounts(h, ws, T), sumCounts(h, addDays(ws, -7), addDays(ws, -1)), sumCounts(h, addDays(T, -29), T)];
+  const heads = ['Today', 'This week', 'Last week', '30 days'];
+  const block = (label, vals, cls = '') => `<div class="qblock ${cls}"><div class="qbn">${label}</div>
+    <dl class="qnums">${vals.map((v, i) => `<div><dt>${heads[i]}</dt><dd>${v}</dd></div>`).join('')}</dl></div>`;
+  const known = cols.map(c => h.items.reduce((a, it) => a + (c[it.id] || 0), 0));
+  const other = cols.map((c, i) => c.total - known[i]);
+  return h.items.map(it => block(esc(it.name), cols.map(c => c[it.id] || 0))).join('')
+    + (other.some(Boolean) ? block('Removed items', other) : '')
+    + block('Total', cols.map(c => c.total), 'total');
+}
+
+function installCard(where) {
+  if (isStandalone()) return where === 'review' ? `<p class="meta">Installed. Running as an app.</p>` : '';
+  if (where === 'today' && (installState === 'pending' || hintDismissed())) return '';
+  const steps = `<ol class="meta" style="padding-left:1.2rem;margin:.5rem 0 .75rem">
+      <li>Open this page in Chrome on Android (HTTPS link).</li>
+      <li>Tap the ⋮ menu, top right.</li>
+      <li>Tap <b>Install app</b> or <b>Add to Home screen</b>.</li>
+      <li>Open STAMP from the home screen. It works offline.</li></ol>`;
+  const body = installState === 'prompt'
+    ? `<p>Put STAMP on your home screen. Full screen, works offline.</p><div class="btns" style="margin-top:.75rem"><button class="btn y" data-act="install">INSTALL APP</button>${where === 'today' ? '<button class="btn" data-act="hide-hint">NOT NOW</button>' : ''}</div>`
+    : `<p>Your browser didn't offer an install button. Do it by hand:</p>${steps}${where === 'today' ? '<div class="btns"><button class="btn sm" data-act="hide-hint">GOT IT</button></div>' : ''}`;
+  return where === 'today' ? `<section class="card"><h2>INSTALL STAMP</h2>${body}</section>` : body;
+}
+
+function viewToday(T) {
+  const act = activeHabits();
+  const head = `<div class="datehead"><p class="meta">${fmt(T, { weekday: 'long' })}${db.settings.boundary ? ` · day ends ${pad(db.settings.boundary)}:00` : ''}</p><h1>${fmt(T, { day: 'numeric', month: 'long' })}</h1></div>`;
+  if (!act.length) {
+    return head + installCard('today') + `<section class="card empty">
+      <h2>NOTHING TO STAMP YET</h2>
+      <p>Start with one habit you could still do on your worst day. Make it small enough to finish in two minutes, and tie it to something you already do.</p>
+      <div class="btns" style="margin-top:1rem"><a class="btn y" href="#new">+ NEW HABIT</a></div></section>`;
+  }
+  const due = [], later = [], paused = [], quits = [];
+  for (const h of act) {
+    if (isPaused(h, T) && !getLog(h, T)?.s) { paused.push(h); continue; }
+    if (isAvoid(h)) quits.push(h);
+    else if (isWeekly(h)) {
+      const wi = weekInfo(h, monday(T), T);
+      (wi.done < wi.quota || getLog(h, T)?.s ? due : later).push(h);
+    } else (isScheduled(h, T) ? due : later).push(h);
+  }
+  const handled = due.filter(h => getLog(h, T)?.s).length;
+  const stamped = due.filter(h => getLog(h, T)?.s === 'done').length;
+  const pct = due.length ? Math.round(100 * handled / due.length) : 100;
+  const twice = due.filter(h => !isWeekly(h) && dayStatus(h, T, T) === 'open' && missedLast(h, T));
+  const slipped = quits.filter(h => dayStatus(h, T, T) === 'open' && missedLast(h, T));
+
+  let html = head;
+  if (due.length || !quits.length) html += `<div class="prog" aria-label="${stamped} of ${due.length} stamped">
+      <div class="bar"><i style="width:${pct}%"></i></div><span class="count">${stamped}/${due.length}</span></div>`;
+  if (twice.length || slipped.length) {
+    html += `<section class="banner" role="alert"><h2>DON'T MISS TWICE</h2>
+      ${twice.length ? `<p>Missed last time: <b>${twice.map(h => esc(h.name)).join(', ')}</b>. One miss is an accident. Do the 2-minute version if that's all you've got.</p>` : ''}
+      ${slipped.length ? `<p>Slipped yesterday: <b>${slipped.map(h => esc(h.name)).join(', ')}</b>. One slip is an accident. Keep today clean.</p>` : ''}</section>`;
+  }
+  html += installCard('today');
+  if (due.length) html += due.map(h => habitCard(h, T)).join('');
+  else if (!quits.length) html += `<section class="card"><h2>NOTHING DUE TODAY</h2><p>Rest is part of the schedule.</p></section>`;
+  if (quits.length) html += `<h2 style="margin:1.75rem 0 .9rem">QUITTING</h2>` + quits.map(h => quitCard(h, T)).join('');
+  if (later.length) html += `<p class="meta later muted">Not due today: ${later.map(h => esc(h.name)).join(' · ')}</p>`;
+  if (paused.length) html += `<p class="meta later muted">Paused: ${paused.map(h => `${esc(h.name)} (until ${fmt(pauseEnd(h, T), { day: 'numeric', month: 'short' })})`).join(' · ')}</p>`;
+  return html;
+}
+
+function viewHabits(T) {
+  const act = activeHabits();
+  const arch = db.habits.filter(h => h.archived);
+  let html = `<div class="spread"><h1>HABITS</h1><a class="btn y" href="#new">+ NEW</a></div>`;
+  if (act.length > SOFT_CAP) {
+    html += `<section class="banner warn"><h2>${act.length} ACTIVE</h2><p>A short list gets done; a long one becomes a wish list. Consider archiving the one you keep skipping.</p></section>`;
+  }
+  if (!act.length) {
+    html += `<section class="card empty"><h2>START WITH ONE</h2>
+      <p>Pick one bad-day-proof habit: something so small you'd still do it sick, tired or travelling. One pushup. One page. One glass of water.</p>
+      <p>Add a second habit when the first one is boring.</p>
+      <div class="btns" style="margin-top:1rem"><a class="btn y" href="#new">+ NEW HABIT</a></div></section>`;
+  }
+  for (const h of act) {
+    const id = esc(h.id), pe = pauseEnd(h, T);
+    html += `<article class="card hrow" style="--c:${h.color}">
+      <button class="hname" data-act="open" data-id="${id}">${esc(h.name)}</button>
+      <p class="meta">${schedText(h)}${pe ? ` · PAUSED UNTIL ${fmt(pe, { day: 'numeric', month: 'short' })}` : ''} · ${isAvoid(h) ? 'DAYS CLEAN' : 'STREAK'} ${streak(h, T)}${isWeekly(h) ? 'W' : ''}</p>
+      ${h.identity ? `<p class="muted">${esc(identText(h.identity))}</p>` : ''}
+      <div class="btns" style="margin-top:.75rem">
+        <a class="btn sm" href="#edit/${encodeURIComponent(h.id)}">EDIT</a>
+        ${pe ? `<button class="btn sm" data-act="resume" data-id="${id}">RESUME</button>` : `<button class="btn sm" data-act="pause" data-id="${id}">PAUSE 7D</button>`}
+        <button class="btn sm" data-act="archive" data-id="${id}">ARCHIVE</button>
+      </div></article>`;
+  }
+  if (arch.length) {
+    html += `<details class="arch"><summary>ARCHIVED (${arch.length})</summary>` + arch.map(h => `<article class="card hrow" style="--c:${h.color}">
+      <button class="hname" data-act="open" data-id="${esc(h.id)}">${esc(h.name)}</button>
+      <p class="meta">${schedText(h)} · ${totalDone(h)} STAMPS KEPT</p>
+      <div class="btns" style="margin-top:.75rem"><button class="btn sm" data-act="restore" data-id="${esc(h.id)}">RESTORE</button></div></article>`).join('') + `</details>`;
+  }
+  return html;
+}
+
+function heatmap(h, T) {
+  const start = addDays(monday(T), -15 * 7);
+  let html = '<div class="hm" role="grid" aria-label="Last 16 weeks"><span></span>';
+  const month = c => fmt(addDays(start, c * 7 + 6), { month: 'short' });
+  for (let c = 0; c < 16; c++) {
+    // label where a month starts; skip the first column if its month ends right away
+    const show = c === 0 ? month(0) === month(2) : month(c) !== month(c - 1);
+    html += `<span class="mo">${show ? month(c) : ''}</span>`;
+  }
+  for (let r = 0; r < 7; r++) {
+    html += `<span class="dl">${'MTWTFSS'[r]}</span>`;
+    for (let c = 0; c < 16; c++) {
+      const d = addDays(start, c * 7 + r);
+      const st = dayStatus(h, d, T);
+      const cls = `cell ${st}${d === T ? ' today' : ''}`;
+      const word = isAvoid(h) ? ({ done: 'clean', miss: `slipped, ${countOf(getLog(h, d))} logged`, open: 'clean so far' }[st] || st) : st;
+      const label = `${fmt(d, { weekday: 'short', day: 'numeric', month: 'short' })}: ${word}`;
+      html += (st === 'pre' || st === 'future')
+        ? `<span class="${cls}" aria-hidden="true"></span>`
+        : `<button class="${cls}" data-act="day" data-id="${esc(h.id)}" data-d="${d}" aria-label="${label}" title="${label}"></button>`;
+    }
+  }
+  return html + '</div>';
+}
+
+function viewDetail(id, T) {
+  const h = findHabit(id);
+  if (!h) return `<h1>NOT FOUND</h1><a class="btn" href="#habits">HABITS</a>`;
+  const pe = pauseEnd(h, T);
+  const notes = Object.entries(db.logs[h.id] || {}).filter(([, e]) => e.n).sort((a, b) => a[0] < b[0] ? 1 : -1).slice(0, 12);
+  const weekly = isWeekly(h), quit = isAvoid(h);
+  return `<div class="btns" style="margin-bottom:1rem"><button class="btn sm" data-act="back">BACK</button></div>
+    <section class="card hcard" style="--c:${h.color}">
+      <h1 style="margin-bottom:.4rem">${esc(h.name)}</h1>
+      <p class="meta">${schedText(h)} · ${quit ? 'QUIT ' : ''}SINCE ${fmt(h.created, { day: 'numeric', month: 'short', year: 'numeric' })}${pe ? ` · PAUSED UNTIL ${fmt(pe, { day: 'numeric', month: 'short' })}` : ''}${h.archived ? ' · ARCHIVED' : ''}</p>
+      ${h.identity ? `<p class="ident">${esc(identText(h.identity))}</p>` : ''}
+      ${cueLines(h)}
+      ${quit ? statTiles(h, T) : statTiles(h, T).replace('</dl>', `<div><dt>Total</dt><dd>${totalDone(h)}</dd></div></dl>`)}
+    </section>
+    ${quit ? `<section class="card"><h2>COUNTS</h2>${countsTable(h, T)}</section>` : ''}
+    <section class="card">
+      <h2>LAST 16 WEEKS</h2>
+      ${heatmap(h, T)}
+      <div class="legend meta">
+        <span><i class="cell done"></i>${quit ? 'Clean' : 'Done'}</span>
+        ${weekly ? '' : `<span><i class="cell miss"></i>${quit ? 'Slipped' : 'Miss'}</span>`}
+        ${quit ? '' : '<span><i class="cell skip"></i>Skip</span>'}
+        <span><i class="cell pause"></i>Paused</span>
+        ${quit ? '' : `<span><i class="cell off"></i>${weekly ? 'Not logged' : 'Off'}</span>`}
+      </div>
+      <p class="meta muted" style="margin-top:.6rem">Tap a day to fix it or add a note.</p>
+    </section>
+    ${notes.length ? `<section class="card"><h2>NOTES</h2><ul class="notes">${notes.map(([d, e]) => `<li><span class="lab">${fmt(d, { weekday: 'short', day: 'numeric', month: 'short' })}${e.s ? ' · ' + e.s.toUpperCase() : ''}${quit && countOf(e) ? ` · ${countOf(e)} LOGGED` : ''}</span>${esc(e.n)}</li>`).join('')}</ul></section>` : ''}
+    <div class="btns">
+      <a class="btn" href="#edit/${encodeURIComponent(h.id)}">EDIT</a>
+      ${h.archived ? '' : pe ? `<button class="btn" data-act="resume" data-id="${esc(h.id)}">RESUME</button>` : `<button class="btn" data-act="pause" data-id="${esc(h.id)}">PAUSE 7D</button>`}
+      <button class="btn" data-act="${h.archived ? 'restore' : 'archive'}" data-id="${esc(h.id)}">${h.archived ? 'RESTORE' : 'ARCHIVE'}</button>
+    </div>`;
+}
+
+const itemRow = it => `<div class="itemrow"><input type="text" class="item-in" data-iid="${esc(it.id)}" value="${esc(it.name)}" maxlength="40" placeholder="Cigarettes" aria-label="Item" autocomplete="off">
+  <button type="button" class="btn sm" data-act="item-del" aria-label="Remove item">−</button></div>`;
+
+function viewEdit(id) {
+  const h = id ? findHabit(id) : null;
+  if (id && !h) return `<h1>NOT FOUND</h1><a class="btn" href="#habits">HABITS</a>`;
+  const T = todayKey();
+  const v = h || { kind: 'do', name: '', identity: '', cue: '', two: '', freq: 'daily', days: [1, 2, 3, 4, 5], times: 3, items: [], created: T, color: ACCENTS[db.habits.length % ACCENTS.length] };
+  const n = activeHabits().length;
+  const radio = (val, label) => `<label class="chip"><input type="radio" name="freq" id="f-${val}" value="${val}" ${v.freq === val ? 'checked' : ''}><span>${label}</span></label>`;
+  const kindChip = (val, label) => `<label class="chip"><input type="radio" name="kind" id="k-${val}" value="${val}" ${(v.kind || 'do') === val ? 'checked' : ''}><span>${label}</span></label>`;
+  const items = v.items?.length ? v.items : [{ id: '', name: '' }];
+  return `<h1>${h ? 'EDIT HABIT' : 'NEW HABIT'}</h1>
+  ${!h && n >= SOFT_CAP ? `<section class="banner warn"><p><b>This would be habit #${n + 1}.</b> The ones that stick are usually on short lists. Consider archiving one first.</p></section>` : ''}
+  <form class="edit card" id="habit-form" novalidate>
+    ${h ? `<input type="radio" name="kind" id="k-${v.kind}" value="${v.kind}" checked hidden>`
+      : `<fieldset class="fld" style="border:0;padding:0;margin:0 0 1.1rem"><legend class="lab">Kind</legend>
+      <div class="chips">${kindChip('do', 'BUILD')}${kindChip('avoid', 'QUIT')}</div></fieldset>`}
+    <label class="fld"><span class="lab">Name — required</span>
+      <input type="text" name="name" maxlength="60" required value="${esc(v.name)}" placeholder="Read" autocomplete="off"></label>
+    <div class="fld only-avoid"><span class="lab">What you're quitting — one item per line, each counted separately</span>
+      <div id="items">${items.map(itemRow).join('')}</div>
+      <div class="btns"><button type="button" class="btn sm" data-act="item-add">+ ITEM</button></div></div>
+    <label class="fld only-avoid"><span class="lab">Quit since</span>
+      <input type="date" name="since" value="${esc(v.created)}" max="${T}"></label>
+    <label class="fld"><span class="lab">Identity — I am the kind of person who…</span>
+      <input type="text" name="identity" maxlength="140" value="${esc(v.identity)}" placeholder="keeps promises to myself" autocomplete="off"></label>
+    <label class="fld"><span class="lab only-do">Cue — after I…</span><span class="lab only-avoid">When the urge hits, instead I…</span>
+      <input type="text" name="cue" maxlength="100" value="${esc(v.cue)}" placeholder="pour my morning coffee" autocomplete="off"></label>
+    <label class="fld only-do"><span class="lab">2-minute version</span>
+      <input type="text" name="two" maxlength="100" value="${esc(v.two)}" placeholder="read one page" autocomplete="off"></label>
+    <fieldset class="fld only-do" style="border:0;padding:0;margin:0 0 1.1rem">
+      <legend class="lab">Schedule</legend>
+      <div class="chips">${radio('daily', 'EVERY DAY')}${radio('weekdays', 'SET DAYS')}${radio('weekly', 'N × WEEK')}</div>
+      <div class="sched-days"><span class="lab">On</span><div class="chips">
+        ${DAY_SHORT.map((d, i) => `<label class="chip"><input type="checkbox" name="days" value="${i + 1}" ${v.days.includes(i + 1) ? 'checked' : ''}><span>${d.slice(0, 2)}</span></label>`).join('')}
+      </div></div>
+      <div class="sched-times"><span class="lab">Times per week</span><div class="stepper">
+        <button type="button" class="btn" data-act="tdec" aria-label="Fewer">−</button>
+        <output id="f-times">${v.times}</output>
+        <button type="button" class="btn" data-act="tinc" aria-label="More">+</button>
+      </div></div>
+    </fieldset>
+    <fieldset class="fld" style="border:0;padding:0;margin:0 0 1.25rem">
+      <legend class="lab">Colour</legend>
+      <div class="chips">${ACCENTS.map((c, i) => `<label class="chip swatch" style="--c:${c}"><input type="radio" name="color" value="${c}" ${v.color === c ? 'checked' : ''} aria-label="${ACCENT_NAMES[i]}"><span></span></label>`).join('')}</div>
+    </fieldset>
+    <p class="meta" id="form-err" role="alert" style="color:#B0003A"></p>
+    <div class="btns"><button class="btn y" type="submit">SAVE</button><button class="btn" type="button" data-act="back">CANCEL</button></div>
+  </form>
+  ${h ? `<section class="card"><h2>DELETE</h2><p class="muted">Archiving keeps the history. Delete removes the habit and every stamp, for good.</p>
+    <div class="btns" style="margin-top:.75rem"><button class="btn pink" data-act="delete" data-id="${esc(h.id)}">DELETE FOREVER</button></div></section>` : ''}`;
+}
+
+function viewReview(T) {
+  const act = activeHabits();
+  const rows = act.map(h => ({ h, s: strength(h, T) })).sort((a, b) => (b.s ?? -1) - (a.s ?? -1));
+  return `<h1>REVIEW</h1>
+  <section class="card"><h2>HABIT STRENGTH</h2>
+    <p class="meta muted" style="margin-bottom:1rem">0–100 over the last 6 weeks. Recent days count more; skips and pauses don't count against you.</p>
+    ${rows.length ? rows.map(({ h, s }) => `<div class="srow" style="--c:${h.color}"><div class="nm">${esc(h.name)}</div>
+      <div class="sline"><div class="sbar" role="img" aria-label="Strength ${s ?? 'not enough data'}"><i style="width:${s ?? 0}%"></i></div><span class="sval">${s ?? '—'}</span></div></div>`).join('')
+      : '<p>No active habits.</p>'}
+  </section>
+  ${act.filter(isAvoid).map(h => {
+    const ws = monday(T), tw = sumCounts(h, ws, T).total, lw = sumCounts(h, addDays(ws, -7), addDays(ws, -1)).total;
+    return `<section class="card hcard" style="--c:${h.color}"><h2>${esc(h.name)}</h2>
+      <p class="meta">${streak(h, T)} DAYS CLEAN · THIS WEEK ${tw} · LAST WEEK ${lw}${lw && tw !== lw ? ` · ${tw < lw ? 'DOWN' : 'UP'} ${Math.abs(tw - lw)}` : ''}</p>
+      <div style="margin-top:.75rem">${countsTable(h, T)}</div></section>`;
+  }).join('')}
+  <section class="card"><h2>DAY BOUNDARY</h2>
+    <label class="fld" style="margin-bottom:.4rem"><span class="lab">A new day starts at</span>
+    <select id="boundary">${[0, 1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${db.settings.boundary === n ? 'selected' : ''}>${pad(n)}:00${n === 0 ? ' (midnight)' : ''}</option>`).join('')}</select></label>
+    <p class="meta muted">Before this hour, "today" is still yesterday. For late nights.</p>
+  </section>
+  <section class="card"><h2>BACKUP</h2>
+    <p class="muted">Everything lives on this device only. Clearing site data erases it, so export now and then.</p>
+    <div class="btns" style="margin:.9rem 0 1.25rem"><button class="btn y" data-act="export">EXPORT JSON</button></div>
+    <label class="fld"><span class="lab">Import — paste exported JSON</span>
+      <textarea id="import-text" spellcheck="false" placeholder='{"habits":[…],"logs":{…},"settings":{…}}'></textarea></label>
+    <div class="btns"><button class="btn" data-act="import">IMPORT &amp; REPLACE</button></div>
+  </section>
+  <section class="card"><h2>INSTALL</h2>${installCard('review')}</section>
+  <p class="meta muted">STAMP · no account · no tracking · ${db.habits.length} habit${db.habits.length === 1 ? '' : 's'} stored locally</p>`;
+}
+
+/* ---------- day sheet ---------- */
+const sheet = document.getElementById('sheet');
+let sheetCtx = null;
+
+function openDay(h, d) {
+  const T = todayKey();
+  if (d > T || d < h.created) return;
+  const L = getLog(h, d) || {};
+  sheetCtx = { id: h.id, d, s: L.s || '', c: { ...(L.c || {}) } };
+  const opt = (s, label) => `<button type="button" class="btn ${sheetCtx.s === s ? 'ink' : ''}" data-act="sheet-s" data-s="${s}" aria-pressed="${sheetCtx.s === s}">${label}</button>`;
+  const controls = isAvoid(h)
+    ? `<div class="qitems">${h.items.map(it => `<div class="qrow"><span class="qn">${esc(it.name)}</span><span class="qctl">
+        <button type="button" class="btn sm" data-act="sheet-c" data-item="${esc(it.id)}" data-delta="-1" aria-label="One less">−</button>
+        <span class="qc" data-qc="${esc(it.id)}">${sheetCtx.c[it.id] || 0}</span>
+        <button type="button" class="btn sm" data-act="sheet-c" data-item="${esc(it.id)}" data-delta="1" aria-label="One more">+1</button></span></div>`).join('')}</div>`
+    : `<div class="btns" id="sheet-opts" style="margin-bottom:1.1rem">${opt('done', 'DONE')}${opt('skip', 'SKIP')}${opt('', 'NOT MARKED')}</div>`;
+  sheet.innerHTML = `<form method="dialog" id="day-form">
+    <p class="meta">${esc(h.name)}</p>
+    <h2 style="font-size:1.5rem;margin:.2rem 0 1rem">${d === T ? 'TODAY' : fmt(d, { weekday: 'long', day: 'numeric', month: 'short' })}</h2>
+    ${controls}
+    <label class="fld"><span class="lab">Note</span><textarea name="note" maxlength="500" placeholder="What happened?">${esc(L.n || '')}</textarea></label>
+    <div class="btns"><button class="btn y" value="save">SAVE</button><button class="btn" value="cancel" formnovalidate>CANCEL</button></div>
+  </form>`;
+  sheet.showModal();
+}
+
+sheet.addEventListener('close', () => {
+  if (sheet.returnValue === 'save' && sheetCtx) {
+    const h = findHabit(sheetCtx.id);
+    const note = sheet.querySelector('textarea').value;
+    if (h && isAvoid(h)) setCounts(h, sheetCtx.d, sheetCtx.c, note);
+    else if (h) setStatus(h, sheetCtx.d, sheetCtx.s || null, note);
+    render();
+  }
+  sheetCtx = null;
+  sheet.returnValue = '';
+});
+
+/* ---------- toast ---------- */
+const toastEl = document.getElementById('toast');
+let toastTimer;
+function toast(msg, ms = 2600) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('on');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('on'), ms);
+}
+toastEl.addEventListener('click', () => toastEl.classList.remove('on'));
+
+/* ---------- install ---------- */
+let deferredPrompt = null;
+let installState = 'pending'; // pending | prompt | manual
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const hintDismissed = () => { try { return localStorage.getItem(HINT_KEY) === '1'; } catch { return false; } };
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; installState = 'prompt'; render(); });
+window.addEventListener('appinstalled', () => { deferredPrompt = null; installState = 'manual'; render(); });
+setTimeout(() => { if (installState === 'pending') { installState = 'manual'; render(); } }, 3000);
+
+/* ---------- routing + render ---------- */
+const main = document.getElementById('view');
+let lastRouteKey = '', lastT = '', navigated = false;
+
+function route() {
+  const [name, arg] = location.hash.replace(/^#/, '').split('/');
+  const a = arg ? decodeURIComponent(arg) : null;
+  if (name === 'habits') return { name, tab: 'habits' };
+  if (name === 'review') return { name, tab: 'review' };
+  if (name === 'habit' && a) return { name, arg: a, tab: 'habits' };
+  if (name === 'edit' && a) return { name, arg: a, tab: 'habits' };
+  if (name === 'new') return { name, tab: 'habits' };
+  return { name: 'today', tab: 'today' };
+}
+
+function render() {
+  const T = todayKey();
+  lastT = T;
+  const r = route();
+  const rk = r.name + '/' + (r.arg || '');
+  // forms keep their in-progress input: don't rebuild them on background re-renders
+  if ((r.name === 'new' || r.name === 'edit') && rk === lastRouteKey) return;
+  const keep = rk === lastRouteKey ? main.scrollTop : 0;
+  document.getElementById('hdate').textContent = fmt(T, { weekday: 'short', day: '2-digit', month: 'short' });
+  document.querySelectorAll('.tabs a').forEach(a => {
+    if (a.dataset.tab === r.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  main.innerHTML =
+    r.name === 'habits' ? viewHabits(T) :
+    r.name === 'review' ? viewReview(T) :
+    r.name === 'habit' ? viewDetail(r.arg, T) :
+    r.name === 'edit' ? viewEdit(r.arg) :
+    r.name === 'new' ? viewEdit(null) :
+    viewToday(T);
+  main.scrollTop = keep;
+  lastRouteKey = rk;
+  if (r.name === 'today') quitMilestones(T);
+}
+
+function goBack(fallback = '#habits') {
+  if (navigated) history.back(); else location.hash = fallback;
+}
+
+window.addEventListener('hashchange', () => { navigated = true; render(); });
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b) return;
+  const act = b.dataset.act;
+  const h = b.dataset.id ? findHabit(b.dataset.id) : null;
+  switch (act) {
+    case 'stamp': if (h) { toggleToday(h, 'done'); render(); } break;
+    case 'skip': if (h) { toggleToday(h, 'skip'); render(); } break;
+    case 'note': if (h) { openDay(h, todayKey()); sheet.querySelector('textarea').focus(); } break;
+    case 'day': if (h) openDay(h, b.dataset.d); break;
+    case 'open': if (h) location.hash = '#habit/' + encodeURIComponent(h.id); break;
+    case 'back': goBack(); break;
+    case 'pause': if (h) { pause7(h); render(); } break;
+    case 'resume': if (h) { resume(h); render(); } break;
+    case 'archive': if (h) { h.archived = true; save(); render(); } break;
+    case 'restore': if (h) { h.archived = false; save(); render(); } break;
+    case 'delete':
+      if (h && confirm(`Delete "${h.name}" and all its history? This can't be undone.`)) {
+        db.habits = db.habits.filter(x => x !== h); delete db.logs[h.id]; save();
+        location.replace('#habits');
+      }
+      break;
+    case 'sheet-s':
+      if (sheetCtx) {
+        sheetCtx.s = b.dataset.s;
+        sheet.querySelectorAll('[data-act="sheet-s"]').forEach(x => { const on = x === b; x.classList.toggle('ink', on); x.setAttribute('aria-pressed', on); });
+      }
+      break;
+    case 'cnt': if (h) { bump(h, b.dataset.item, Number(b.dataset.delta)); render(); } break;
+    case 'sheet-c':
+      if (sheetCtx) {
+        const k = b.dataset.item;
+        sheetCtx.c[k] = Math.max(0, Math.min(999, (sheetCtx.c[k] || 0) + Number(b.dataset.delta)));
+        sheet.querySelector(`[data-qc="${CSS.escape(k)}"]`).textContent = sheetCtx.c[k];
+      }
+      break;
+    case 'item-add': {
+      const box = document.getElementById('items');
+      box.insertAdjacentHTML('beforeend', itemRow({ id: '', name: '' }));
+      box.lastElementChild.querySelector('input').focus();
+      break;
+    }
+    case 'item-del': {
+      const box = document.getElementById('items');
+      if (box.children.length > 1) b.closest('.itemrow').remove(); else box.querySelector('input').value = '';
+      break;
+    }
+    case 'tdec': case 'tinc': {
+      const o = document.getElementById('f-times');
+      o.textContent = clampInt(Number(o.textContent) + (act === 'tinc' ? 1 : -1), 1, 6, 3);
+      break;
+    }
+    case 'export': exportJSON(); break;
+    case 'import': importJSON(); break;
+    case 'install':
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.finally(() => { deferredPrompt = null; installState = 'manual'; render(); });
+      }
+      break;
+    case 'hide-hint':
+      try { localStorage.setItem(HINT_KEY, '1'); } catch {}
+      render();
+      break;
+  }
+});
+
+document.addEventListener('submit', e => {
+  if (e.target.id !== 'habit-form') return;
+  e.preventDefault();
+  const f = e.target, fd = new FormData(f);
+  const err = document.getElementById('form-err');
+  const name = str(fd.get('name'), 60);
+  const freq = fd.get('freq') || 'daily';
+  const days = fd.getAll('days').map(Number).sort();
+  if (!name) { err.textContent = 'Give it a name.'; f.name.focus(); return; }
+  const r = route();
+  const isNew = r.name === 'new';
+  const kind = fd.get('kind') === 'avoid' ? 'avoid' : 'do';
+  const items = kind === 'avoid' ? [...f.querySelectorAll('.item-in')].map(i => ({ id: i.dataset.iid || 'i' + uid(), name: str(i.value, 40) })).filter(it => it.name) : [];
+  if (kind === 'avoid' && !items.length) items.push({ id: 'i' + uid(), name });
+  const since = fd.get('since');
+  if (kind === 'do' && freq === 'weekdays' && !days.length) { err.textContent = 'Pick at least one day.'; return; }
+  const h = isNew ? { id: uid(), created: todayKey(), archived: false, pausedUntil: null, pauses: [] } : findHabit(r.arg);
+  if (!h) return;
+  Object.assign(h, {
+    kind, name, identity: str(fd.get('identity'), 140), cue: str(fd.get('cue'), 100), two: kind === 'avoid' ? '' : str(fd.get('two'), 100),
+    freq: kind === 'avoid' ? 'daily' : freq, days: days.length ? days : (h.days || [1, 2, 3, 4, 5]),
+    times: clampInt(document.getElementById('f-times').textContent, 1, 6, 3),
+    color: ACCENTS.includes(fd.get('color')) ? fd.get('color') : ACCENTS[0],
+    items,
+  });
+  if (kind === 'avoid' && isDate(since) && since <= todayKey()) h.created = since;
+  if (isNew) { db.habits.push(h); db.logs[h.id] = {}; navigator.storage?.persist?.(); }
+  save();
+  if (isNew) location.replace('#today'); else goBack();
+});
+
+document.addEventListener('change', e => {
+  if (e.target.name === 'kind') {
+    document.querySelector('#habit-form [name=cue]').placeholder = e.target.value === 'avoid' ? 'drink a glass of water' : 'pour my morning coffee';
+    document.querySelector('#habit-form [name=name]').placeholder = e.target.value === 'avoid' ? 'Smoking' : 'Read';
+  }
+  if (e.target.id === 'boundary') {
+    db.settings.boundary = clampInt(e.target.value, 0, 6, 0);
+    save(); render();
+  }
+});
+
+function exportJSON() {
+  const T = todayKey();
+  const blob = new Blob([JSON.stringify(db, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `stamp-backup-${T}.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+
+function importJSON() {
+  const ta = document.getElementById('import-text');
+  let next;
+  try { next = normalize(JSON.parse(ta.value)); }
+  catch (e) { toast('Import failed: ' + (e instanceof SyntaxError ? 'not valid JSON.' : e.message)); return; }
+  if (!confirm(`Replace everything on this device with ${next.habits.length} imported habit${next.habits.length === 1 ? '' : 's'}?`)) return;
+  db = next; save(); ta.value = '';
+  toast(`Imported ${next.habits.length} habit${next.habits.length === 1 ? '' : 's'}.`);
+  render();
+}
+
+/* day rollover: re-render when "today" changes */
+function tick() { if (todayKey() !== lastT) render(); }
+setInterval(tick, 60 * 1000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+
+/* other tabs editing the same data */
+window.addEventListener('storage', e => { if (e.key === KEY) { db = load(); lastRouteKey = ''; render(); } });
+
+render();
+
+if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  navigator.serviceWorker.register('./sw.js').catch(err => console.warn('STAMP: service worker not registered', err));
+}
+</script>
+</body>
+</html>
