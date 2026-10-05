@@ -70,6 +70,11 @@ smoking and drinking where several items belong together.
   habit. Names gained a "›" and a pressed state, because the owner couldn't find
   the heatmap when the name didn't look tappable.
 - **The whole card is not tappable,** on purpose. See CLAUDE.md.
+- **Back returns to the same scroll position; fresh visits start at the top.**
+  Each history entry gets an id in `history.state`, and its scroll position is
+  remembered when you leave it. Tabs, the logo and links create new entries,
+  so they open at the top. The owner asked for this after losing their place
+  when going back from a habit's page.
 - **The big date on TODAY is capped with `vw`,** because at 26px root text
   "OCTOBER" broke mid-word.
 
@@ -85,3 +90,15 @@ smoking and drinking where several items belong together.
 - **Deploys upload an allowlist of app files** from a staging folder, not the
   repo root. The first two deploys used `--dir=.`, which was fine until
   `CLAUDE.md` and `docs/` existed; after that it would have published the notes.
+
+## Night mode
+
+- **LIGHT / NIGHT / AUTO on REVIEW, LIGHT by default,** so nothing changed for
+  existing data. AUTO follows the phone's dark mode, live.
+- **At night the yellow header goes dark** and the logo inverts to yellow, to cut
+  glare. Accent colours stay; text on them stays dark.
+- **Stamped cards get a dark tint of their colour at night** instead of a full
+  bright fill, which glared in a dark room. The cream STAMPED button still shows
+  the state.
+- **Done cells in the heatmap are cream at night,** following "done = ink".
+

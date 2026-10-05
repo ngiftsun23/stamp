@@ -71,7 +71,8 @@ habits: [{ id, kind: do|avoid, name, identity, cue, two,
            color, created: YYYY-MM-DD, archived, pausedUntil,
            pauses: [[from, to]], items: [{ id, name }], toasted }]
 logs:   { [habitId]: { [YYYY-MM-DD]: { s: done|skip, n: note, c: { [itemId]: count } } } }
-settings: { boundary: 0-6 }   // before this hour, "today" is still yesterday
+settings: { boundary: 0-6,    // before this hour, "today" is still yesterday
+            theme: light|dark|auto }
 ```
 
 - `pauses` keeps every pause; `pausedUntil` only mirrors the current one.
@@ -100,6 +101,12 @@ settings: { boundary: 0-6 }   // before this hour, "today" is still yesterday
 - **The habit name is the way into a habit's page.** It is a full-width button
   with a "›" after it. The whole card is deliberately *not* tappable, because
   stray taps near STAMP or +1 would navigate away.
+
+- **Night mode is a second set of CSS tokens** on `:root[data-theme="dark"]`.
+  Use the tokens, never raw colours: `--ink`/`--card`/`--page` flip, `--on` is
+  dark text on accent blocks in both themes, `--hi-bg`/`--hi-fg` mark the active
+  tab and selected chips. A small script in `<head>` applies the saved theme
+  before first paint so NIGHT doesn't flash light.
 
 ## Gotchas
 

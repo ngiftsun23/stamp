@@ -1,0 +1,342 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STAMP compact Today mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=IBM+Plex+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;700&display=swap">
+<style>:root{
+  --page:#F3EFE4; --card:#FFFDF8; --ink:#111;
+  --yellow:#FFE14A; --pink:#FF5C8A; --lime:#C6F54A; --sky:#7AD7FF; --orange:#FF8A3D;
+  --skip:#BDB4A3; --skipbg:#E4DDCF; --line:#D6CEBE; --muted:#4A463F;
+  --on:#111;                                   /* text on accent-coloured blocks, both themes */
+  --hi-bg:#111; --hi-fg:var(--yellow);         /* active tab, selected chip */
+  --top-bg:var(--yellow); --mark-bg:#111; --mark-fg:var(--yellow);
+  --err:#B0003A;
+  --b:3px solid var(--ink); --sh:5px 5px 0 var(--ink);
+  --display:'Archivo Black','Arial Black',Impact,sans-serif;
+  --ui:'Space Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+/* NIGHT: cream ink on near-black; accents keep their colour, text on them stays dark */
+:root[data-theme="dark"]{
+  --page:#121110; --card:#1E1C1A; --ink:#F3EFE4;
+  --skip:#6F685D; --skipbg:#2A2723; --line:#3B3732; --muted:#B5AD9F;
+  --hi-bg:var(--yellow); --hi-fg:#111;
+  --top-bg:#1E1C1A; --mark-bg:var(--yellow); --mark-fg:#111;
+  --err:#FF8FA9;
+  color-scheme:dark;
+}
+*{box-sizing:border-box;border-radius:0}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+html,body{margin:0;height:100%}
+body{background:var(--page);color:var(--ink);font:500 1rem/1.4 var(--ui);-webkit-tap-highlight-color:transparent;overscroll-behavior-y:none}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px dashed var(--ink);outline-offset:3px}
+
+#app{height:100dvh;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--page)}
+@media (min-width:530px){#app{border-left:var(--b);border-right:var(--b)}}
+
+.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--top-bg);color:var(--ink);border-bottom:var(--b);
+  padding:max(.6rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) .6rem max(1rem,env(safe-area-inset-left))}
+.mark{display:inline-flex;align-items:center;min-height:44px;font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--mark-bg);color:var(--mark-fg);padding:.35rem .55rem;text-decoration:none;transition:transform 60ms linear}
+.mark:active{transform:translate(3px,3px)}
+.top .meta{text-align:right}
+
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem max(1rem,env(safe-area-inset-right)) 2rem max(1rem,env(safe-area-inset-left))}
+
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:var(--b);background:var(--card);padding-bottom:env(safe-area-inset-bottom)}
+.tabs a{min-height:3.4rem;display:grid;place-items:center;font:min(1rem,4.4vw)/1 var(--display);color:var(--ink);text-decoration:none;border-right:var(--b);padding:.5rem .25rem;letter-spacing:.02em}
+.tabs a:last-child{border-right:0}
+.tabs a[aria-current="page"]{background:var(--hi-bg);color:var(--hi-fg)}
+
+h1{font:2rem/1 var(--display);text-transform:uppercase;margin:.25rem 0 .9rem;letter-spacing:-.01em;overflow-wrap:anywhere}
+h2{font:1.1rem/1.1 var(--display);text-transform:uppercase;margin:0 0 .75rem}
+p{margin:.4rem 0}
+.meta,.lab{font:500 .78rem/1.35 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.lab{display:block;margin-bottom:.35rem}
+.muted{color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center}
+.spread{display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between}
+
+.card{background:var(--card);border:var(--b);box-shadow:var(--sh);padding:1rem;margin:0 5px 1.25rem 0}
+
+.btn{appearance:none;-webkit-appearance:none;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  min-height:44px;min-width:44px;padding:.65rem 1rem;font:1rem/1.1 var(--display);text-transform:uppercase;letter-spacing:.02em;
+  background:var(--card);color:var(--ink);border:var(--b);box-shadow:var(--sh);cursor:pointer;text-decoration:none;text-align:center;
+  transition:transform 60ms linear,box-shadow 60ms linear;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.btn:active{transform:translate(3px,3px);box-shadow:none}
+.btn.ink{background:var(--ink);color:var(--card)}
+.btn.y{background:var(--yellow)}
+.btn.pink{background:var(--pink)}
+.btn.y,.btn.pink,.banner,.toast,.qstate,.hcard.is-done,.acts .stamp{color:var(--on)}
+.hcard.is-done .stats div{color:var(--ink)}
+/* at night a fully lit card glares: stamped cards get a dark tint of their colour instead */
+:root[data-theme="dark"] .hcard.is-done{background:color-mix(in srgb,var(--c) 22%,var(--card));color:var(--ink)}
+.btn.sm{font-size:.85rem;padding:.5rem .7rem}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btns{display:flex;flex-wrap:wrap;gap:.75rem;padding:0 5px 5px 0}
+
+/* TODAY */
+.datehead{margin-bottom:1rem}
+.datehead h1{font-size:min(2.3rem,10.5vw);margin:0;overflow-wrap:normal}
+.prog{display:flex;align-items:center;gap:.75rem;margin:.75rem 5px 1.25rem 0}
+.bar{flex:1;height:1.4rem;border:var(--b);background:var(--card);box-shadow:var(--sh)}
+.bar i{display:block;height:100%;background:var(--ink)}
+.count{font:1.4rem/1 var(--display);white-space:nowrap}
+.banner{background:var(--pink);border:var(--b);box-shadow:var(--sh);padding:.9rem 1rem;margin:0 5px 1.25rem 0}
+.banner h2{margin-bottom:.35rem}
+.hcard{border-top-width:14px;border-top-color:var(--c)}
+.hcard.is-done{background:var(--c)}
+.hcard.is-skip{background:var(--skipbg)}
+.hname{display:block;width:100%;min-height:44px;background:none;border:0;padding:0;text-align:left;cursor:pointer;
+  font:1.4rem/1.1 var(--display);text-transform:uppercase;overflow-wrap:anywhere;transition:transform 60ms linear}
+.hname::after{content:"\203A" / "";margin-left:.4em}
+.hname:active{transform:translate(3px,3px)}
+.cue{font:500 .95rem/1.35 var(--ui);margin:.25rem 0}
+.cue b{font:600 .72rem/1 var(--mono);letter-spacing:.05em;background:var(--ink);color:var(--card);padding:.15rem .35rem;margin-right:.35rem;vertical-align:.12em}
+.stats{display:flex;flex-wrap:wrap;gap:.5rem;margin:.8rem 0 1rem}
+.stats div{flex:1 1 5.5rem;border:var(--b);background:var(--card);padding:.35rem .55rem}
+.stats dt{font:500 .68rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.05em}
+.stats dd{margin:.15rem 0 0;font:1.35rem/1.05 var(--display)}
+.note{font:500 .85rem/1.35 var(--mono);border-left:var(--b);padding-left:.6rem;margin:.6rem 0 .9rem;overflow-wrap:anywhere;white-space:pre-wrap}
+.acts{display:flex;flex-wrap:wrap;gap:.75rem;padding:0 5px 5px 0}
+.acts .stamp{flex:2 1 9rem;font-size:1.25rem;min-height:3.4rem;background:var(--c)}
+.hcard.is-done .acts .stamp{background:var(--ink);color:var(--card)}
+.acts .btn:not(.stamp){flex:1 1 5rem}
+.hcard.is-skip .acts [data-act="skip"]{background:var(--ink);color:var(--card)}
+.undo{margin:.6rem 0 0}
+.later{margin-top:.5rem}
+
+/* HABITS */
+.hrow .hname{font-size:1.2rem}
+.hrow{border-left-width:14px;border-left-color:var(--c)}
+.warn{background:var(--orange)}
+details.arch summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font:1rem/1 var(--display);text-transform:uppercase;list-style:none}
+details.arch summary::-webkit-details-marker{display:none}
+details.arch summary::before{content:"+";display:inline-grid;place-items:center;width:1.6rem;height:1.6rem;border:var(--b);margin-right:.6rem;font-size:1rem}
+details.arch[open] summary::before{content:"\2212"}
+
+/* DETAIL */
+.ident{font:700 1.05rem/1.35 var(--ui);margin:.25rem 0 .5rem}
+.hm{display:grid;grid-template-columns:auto repeat(16,minmax(0,1fr));gap:3px;align-items:center;margin:.5rem 0 .75rem}
+.hm .dl{font:500 .62rem/1 var(--mono);padding-right:.3rem;text-align:right}
+.hm .mo{font:600 .6rem/1 var(--mono);white-space:nowrap;overflow:visible;height:1em;text-transform:uppercase}
+.cell{aspect-ratio:1;min-width:0;width:100%;padding:0;margin:0;border:2px solid var(--ink);background:var(--card);cursor:pointer;display:block}
+.cell.done,.cell.extra{background:var(--ink)}
+.cell.miss{background:var(--pink)}
+.cell.skip{background:var(--skip)}
+.cell.pause{border-style:dashed}
+.cell.off{border-color:var(--line)}
+.cell.pre,.cell.future{border-color:transparent;background:transparent;cursor:default}
+.cell.today{outline:3px solid var(--ink);outline-offset:2px}
+.legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem}
+.legend span{display:inline-flex;align-items:center;gap:.35rem}
+.legend .cell{width:.9rem;height:.9rem;display:inline-block;cursor:default}
+.notes{list-style:none;margin:0;padding:0}
+.notes li{border-top:2px solid var(--line);padding:.55rem 0}
+.notes li:first-child{border-top:0}
+
+/* FORMS */
+.fld{display:block;margin-bottom:1.1rem}
+input[type=text],input[type=number],input[type=date],textarea,select{width:100%;min-height:44px;padding:.65rem .75rem;border:var(--b);background:var(--card);font:500 1rem/1.35 var(--ui);border-radius:0;-webkit-appearance:none;appearance:none}
+textarea{min-height:6rem;resize:vertical}
+select{background-image:none;cursor:pointer}
+.chips{display:flex;flex-wrap:wrap;gap:.6rem;padding:0 5px 5px 0}
+.chip{position:relative;display:inline-block}
+.chip input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.chip span{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0 .75rem;border:var(--b);background:var(--card);box-shadow:var(--sh);font:.95rem/1 var(--display);text-transform:uppercase}
+.chip input:checked+span{background:var(--hi-bg);color:var(--hi-fg)}
+.chip input:focus-visible+span{outline:3px dashed var(--ink);outline-offset:3px}
+.chip input:active+span{transform:translate(3px,3px);box-shadow:none}
+.swatch span{width:3rem;background:var(--c)}
+.swatch input:checked+span{background:var(--c);outline:3px solid var(--ink);outline-offset:3px;color:var(--ink)}
+.sched-days,.sched-times{display:none;margin-top:.9rem}
+.edit:has(#f-weekdays:checked) .sched-days{display:block}
+.edit:has(#f-weekly:checked) .sched-times{display:block}
+.stepper{display:flex;align-items:center;gap:.75rem;padding:0 5px 5px 0}
+.stepper output{font:1.8rem/1 var(--display);min-width:2.2rem;text-align:center}
+
+/* REVIEW */
+.srow{margin-bottom:.9rem}
+.srow .nm{font:1rem/1.15 var(--display);text-transform:uppercase;overflow-wrap:anywhere}
+.sline{display:flex;align-items:center;gap:.6rem;margin-top:.3rem}
+.sbar{flex:1;height:1.15rem;border:var(--b);background:var(--card)}
+.sbar i{display:block;height:100%;background:var(--c);border-right:3px solid var(--ink)}
+.sbar i[style*="width:0%"]{border-right:0}
+.sval{font:1.15rem/1 var(--display);min-width:2.6ch;text-align:right}
+
+/* QUIT habits */
+.qstate{display:inline-block;font:600 .78rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.05em;border:var(--b);padding:.3rem .5rem;margin:0 0 .5rem}
+.qstate.clean{background:var(--lime)}
+.qstate.slip{background:var(--pink)}
+.qitems{margin:.25rem 0 1rem}
+.qrow{display:flex;flex-wrap:wrap;align-items:center;gap:.6rem;border-top:2px solid var(--line);padding:.6rem 5px .6rem 0}
+.qrow:first-child{border-top:0}
+.qrow .qn{flex:1 1 6.5rem;font:1rem/1.15 var(--display);text-transform:uppercase;overflow-wrap:anywhere}
+.qrow .qctl{display:flex;align-items:center;gap:.6rem}
+.qrow .qc{font:1.5rem/1 var(--display);min-width:2ch;text-align:center}
+.qblock{border-top:2px solid var(--line);padding:.6rem 0}
+.qblock:first-child{border-top:0;padding-top:0}
+.qblock.total{border-top:3px solid var(--ink)}
+.qbn{font:1rem/1.15 var(--display);text-transform:uppercase;overflow-wrap:anywhere;margin-bottom:.35rem}
+.qnums{display:flex;flex-wrap:wrap;gap:.35rem 1rem;margin:0}
+.qnums div{display:flex;align-items:baseline;gap:.35rem}
+.qnums dt{font:500 .7rem/1.2 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.qnums dd{margin:0;font:1.05rem/1 var(--display)}
+.itemrow{display:flex;gap:.6rem;margin-bottom:.6rem;padding-right:5px}
+.itemrow input{flex:1;min-width:0}
+.only-avoid{display:none}
+.edit:has(#k-avoid:checked) .only-avoid{display:block}
+.edit:has(#k-avoid:checked) .only-do{display:none}
+
+/* SHEET + TOAST */
+dialog{border:var(--b);box-shadow:var(--sh);background:var(--card);color:var(--ink);padding:1rem;width:min(480px,calc(100vw - 2rem));max-height:calc(100dvh - 2rem);overflow:auto}
+dialog::backdrop{background:#111;opacity:.55}
+.toast{position:fixed;left:50%;bottom:calc(4.6rem + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:20;
+  width:min(480px,calc(100vw - 2rem));background:var(--yellow);border:var(--b);box-shadow:var(--sh);padding:.8rem 1rem;
+  font:1rem/1.25 var(--display);text-transform:uppercase;display:none}
+.toast.on{display:block}
+.empty p{font-size:1.05rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+@media (prefers-reduced-motion:reduce){.btn{transition:none}}
+
+/* ---- mockup shell ---- */
+#app{max-width:1100px}
+.mockbar{position:sticky;top:0;z-index:5;background:var(--page);border-bottom:var(--b);padding:.6rem max(1rem,env(safe-area-inset-left));display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.mockbar .meta{flex:1 1 12rem}
+.cmp{display:flex;flex:1;min-height:0}
+.col{display:none;flex:1;min-width:0;overflow-y:auto;padding:1rem 1rem 2rem}
+.col.on{display:block}
+.colhead{font:600 .78rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;background:var(--ink);color:var(--yellow);padding:.45rem .6rem;margin:0 5px 1rem 0}
+.only-wide{display:none}
+@media (min-width:760px){
+
+  .col{display:block;max-width:520px;border-right:var(--b)}
+  .only-narrow{display:none}.only-wide{display:inline}
+}
+/* ---- COMPACT rows (proposed) ---- */
+.crow{background:var(--card);border:var(--b);border-left:12px solid var(--c);box-shadow:var(--sh);margin:0 5px .9rem 0}
+.crow-head{padding:.6rem .6rem .6rem .7rem;cursor:pointer}
+.crow-top{display:flex;align-items:center;gap:.6rem}
+.crow-bot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem .75rem;margin-top:.45rem;padding-right:5px}
+.crow-tog{flex:0 0 auto;display:grid;place-items:center;width:1.6rem;height:1.6rem;border:var(--b);font:1rem/1 var(--display);background:var(--card);color:var(--ink)}
+.crow-name{flex:1;min-width:0;font:1.08rem/1.1 var(--display);text-transform:uppercase;overflow-wrap:anywhere}
+.crow-meta{flex:1 1 7rem;font:500 .72rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.crow-btn{flex:0 0 auto;min-width:5.4rem;min-height:3rem;font-size:.9rem;padding:.5rem .6rem;background:var(--c);color:var(--on)}
+.crow.is-done{background:var(--c);color:var(--on)}
+.crow.is-done .crow-btn{background:var(--ink);color:var(--card)}
+.crow.is-skip{background:var(--skipbg)}
+.crow-body{display:none;padding:.8rem .8rem 1rem;border-top:2px solid var(--line)}
+.crow.is-done .crow-body{border-top-color:var(--ink)}
+.crow.open .crow-body{display:block}
+.crow .stats div{color:var(--ink)}
+.openlink{display:inline-block;margin-top:.75rem;font:600 .78rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:inherit}
+.qtag{display:inline-block;padding:0 .3rem;border:2px solid currentColor;margin-left:.3rem}
+</style></head><body>
+<div id="app">
+  <header class="top"><span class="mark">STAMP</span><span class="meta">MOCKUP · NOT THE REAL APP</span></header>
+  <div class="mockbar">
+    <span class="meta">Same 12 habits, two layouts. <span class="only-wide">Side by side.</span><span class="only-narrow">Switch:</span></span>
+    <span class="chips only-narrow">
+      <label class="chip"><input type="radio" name="view" value="current"><span>CURRENT</span></label>
+      <label class="chip"><input type="radio" name="view" value="compact" checked><span>COMPACT</span></label>
+    </span>
+    <label class="chip"><input type="checkbox" id="night"><span>NIGHT</span></label>
+  </div>
+  <div class="cmp">
+    <section class="col" id="col-current"><p class="colhead">CURRENT · <span data-len></span></p><div class="datehead"><p class="meta">MONDAY</p><h1>5 OCTOBER</h1></div>
+  <div class="prog"><div class="bar"><i style="width:40%"></i></div><span class="count">3/10</span></div>
+  <section class="banner"><h2>DON'T MISS TWICE</h2><p>Missed last time: <b>Stretch</b>. Slipped yesterday: <b>Smoking</b>.</p></section><article class="card hcard " style="--c:#FFE14A"><button class="hname">Read</button><p class="cue"><b>AFTER I</b>pour my morning coffee</p><p class="cue"><b>2 MIN</b>read one page</p><dl class="stats"><div><dt>Streak</dt><dd>29</dd></div><div><dt>Best</dt><dd>29</dd></div><div><dt>Strength</dt><dd>99</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div></article><article class="card hcard " style="--c:#FF5C8A"><button class="hname">Stretch</button><p class="cue"><b>AFTER I</b>get out of bed</p><p class="cue"><b>2 MIN</b>one forward fold</p><dl class="stats"><div><dt>Streak</dt><dd>0</dd></div><div><dt>Best</dt><dd>9</dd></div><div><dt>Strength</dt><dd>73</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div></article><article class="card hcard is-done" style="--c:#7AD7FF"><button class="hname">Gym</button><p class="cue"><b>AFTER I</b>leave work on Mon, Wed or Fri</p><p class="cue"><b>2 MIN</b>put on gym clothes</p><dl class="stats"><div><dt>This week</dt><dd>1/3</dd></div><div><dt>Streak</dt><dd>5W</dd></div><div><dt>Best</dt><dd>5W</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMPED</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div><p class="meta undo">Tap STAMPED again to undo</p></article><article class="card hcard is-done" style="--c:#C6F54A"><button class="hname">Meditate</button><p class="cue"><b>AFTER I</b>sit down at my desk</p><p class="cue"><b>2 MIN</b>three slow breaths</p><dl class="stats"><div><dt>Streak</dt><dd>42</dd></div><div><dt>Best</dt><dd>42</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMPED</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div><p class="meta undo">Tap STAMPED again to undo</p></article><article class="card hcard " style="--c:#FF8A3D"><button class="hname">Journal</button><p class="cue"><b>AFTER I</b>brush my teeth at night</p><p class="cue"><b>2 MIN</b>write one sentence</p><dl class="stats"><div><dt>Streak</dt><dd>6</dd></div><div><dt>Best</dt><dd>6</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div></article><article class="card hcard is-skip" style="--c:#7AD7FF"><button class="hname">Glass of water</button><p class="cue"><b>AFTER I</b>wake up</p><p class="cue"><b>2 MIN</b>one glass</p><dl class="stats"><div><dt>Streak</dt><dd>99</dd></div><div><dt>Best</dt><dd>99</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIPPED</button><button class="btn">NOTE</button></div><p class="meta undo">Tap SKIPPED again to undo</p></article><article class="card hcard " style="--c:#FFE14A"><button class="hname">Floss</button><p class="cue"><b>AFTER I</b>brush my teeth</p><p class="cue"><b>2 MIN</b>one tooth</p><dl class="stats"><div><dt>Streak</dt><dd>12</dd></div><div><dt>Best</dt><dd>30</dd></div><div><dt>Strength</dt><dd>88</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div></article><article class="card hcard " style="--c:#C6F54A"><button class="hname">Plan tomorrow</button><p class="cue"><b>AFTER I</b>close my laptop</p><p class="cue"><b>2 MIN</b>write one task</p><dl class="stats"><div><dt>Streak</dt><dd>3</dd></div><div><dt>Best</dt><dd>11</dd></div><div><dt>Strength</dt><dd>64</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div></article><article class="card hcard " style="--c:#FF8A3D"><button class="hname">Walk 20 min</button><p class="cue"><b>AFTER I</b>finish lunch</p><p class="cue"><b>2 MIN</b>walk to the corner</p><dl class="stats"><div><dt>This week</dt><dd>2/4</dd></div><div><dt>Streak</dt><dd>2W</dd></div><div><dt>Best</dt><dd>4W</dd></div><div><dt>Strength</dt><dd>71</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMP</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div></article><article class="card hcard is-done" style="--c:#FF5C8A"><button class="hname">Vitamins</button><p class="cue"><b>AFTER I</b>eat breakfast</p><p class="cue"><b>2 MIN</b>one pill</p><dl class="stats"><div><dt>Streak</dt><dd>8</dd></div><div><dt>Best</dt><dd>8</dd></div><div><dt>Strength</dt><dd>95</dd></div></dl>
+      <div class="acts"><button class="btn stamp" data-mock="cstamp">STAMPED</button><button class="btn" data-mock="cskip">SKIP</button><button class="btn">NOTE</button></div><p class="meta undo">Tap STAMPED again to undo</p></article><h2 style="margin:1.75rem 0 .9rem">QUITTING</h2><article class="card hcard" style="--c:#FF8A3D"><button class="hname">Smoking</button><p class="cue"><b>URGE? INSTEAD I</b>chew gum and walk around the block</p>
+      <dl class="stats"><div><dt>Days clean</dt><dd>0</dd></div><div><dt>Best</dt><dd>13</dd></div><div><dt>Strength</dt><dd>81</dd></div></dl>
+      <p class="qstate clean">Clean so far today</p><div class="qitems"><div class="qrow"><span class="qn">Cigarettes</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div><div class="qrow"><span class="qn">Cigars</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div><div class="qrow"><span class="qn">Shisha</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div></div><div class="acts"><button class="btn">NOTE</button></div></article><article class="card hcard" style="--c:#7AD7FF"><button class="hname">Soda</button><p class="cue"><b>URGE? INSTEAD I</b>drink sparkling water</p>
+      <dl class="stats"><div><dt>Days clean</dt><dd>10</dd></div><div><dt>Best</dt><dd>10</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl>
+      <p class="qstate clean">Clean so far today</p><div class="qitems"><div class="qrow"><span class="qn">Soda</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div></div><div class="acts"><button class="btn">NOTE</button></div></article></section>
+    <section class="col on" id="col-compact"><p class="colhead">COMPACT (proposed) · <span data-len></span></p><div class="datehead"><p class="meta">MONDAY</p><h1>5 OCTOBER</h1></div>
+  <div class="prog"><div class="bar"><i style="width:40%"></i></div><span class="count">3/10</span></div>
+  <section class="banner"><h2>DON'T MISS TWICE</h2><p>Missed last time: <b>Stretch</b>. Slipped yesterday: <b>Smoking</b>.</p></section><article class="crow" style="--c:#FFE14A">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Read</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 29 · best 29</div><button class="btn crow-btn" data-mock="stamp">STAMP</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>pour my morning coffee</p><p class="cue"><b>2 MIN</b>read one page</p><dl class="stats"><div><dt>Streak</dt><dd>29</dd></div><div><dt>Best</dt><dd>29</dd></div><div><dt>Strength</dt><dd>99</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow open" style="--c:#FF5C8A">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">−</span><div class="crow-name">Stretch</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 0 · best 9</div><button class="btn crow-btn" data-mock="stamp">STAMP</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>get out of bed</p><p class="cue"><b>2 MIN</b>one forward fold</p><dl class="stats"><div><dt>Streak</dt><dd>0</dd></div><div><dt>Best</dt><dd>9</dd></div><div><dt>Strength</dt><dd>73</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow is-done" style="--c:#7AD7FF">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Gym</div></div>
+      <div class="crow-bot"><div class="crow-meta">1/3 this week · Streak 5W · best 5W</div><button class="btn crow-btn" data-mock="stamp">STAMPED</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>leave work on Mon, Wed or Fri</p><p class="cue"><b>2 MIN</b>put on gym clothes</p><dl class="stats"><div><dt>This week</dt><dd>1/3</dd></div><div><dt>Streak</dt><dd>5W</dd></div><div><dt>Best</dt><dd>5W</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow is-done" style="--c:#C6F54A">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Meditate</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 42 · best 42</div><button class="btn crow-btn" data-mock="stamp">STAMPED</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>sit down at my desk</p><p class="cue"><b>2 MIN</b>three slow breaths</p><dl class="stats"><div><dt>Streak</dt><dd>42</dd></div><div><dt>Best</dt><dd>42</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow" style="--c:#FF8A3D">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Journal</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 6 · best 6</div><button class="btn crow-btn" data-mock="stamp">STAMP</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>brush my teeth at night</p><p class="cue"><b>2 MIN</b>write one sentence</p><dl class="stats"><div><dt>Streak</dt><dd>6</dd></div><div><dt>Best</dt><dd>6</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow is-skip" style="--c:#7AD7FF">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Glass of water</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 99 · best 99</div><button class="btn crow-btn" data-mock="stamp">SKIPPED</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>wake up</p><p class="cue"><b>2 MIN</b>one glass</p><dl class="stats"><div><dt>Streak</dt><dd>99</dd></div><div><dt>Best</dt><dd>99</dd></div><div><dt>Strength</dt><dd>100</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIPPED</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow" style="--c:#FFE14A">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Floss</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 12 · best 30</div><button class="btn crow-btn" data-mock="stamp">STAMP</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>brush my teeth</p><p class="cue"><b>2 MIN</b>one tooth</p><dl class="stats"><div><dt>Streak</dt><dd>12</dd></div><div><dt>Best</dt><dd>30</dd></div><div><dt>Strength</dt><dd>88</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow" style="--c:#C6F54A">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Plan tomorrow</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 3 · best 11</div><button class="btn crow-btn" data-mock="stamp">STAMP</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>close my laptop</p><p class="cue"><b>2 MIN</b>write one task</p><dl class="stats"><div><dt>Streak</dt><dd>3</dd></div><div><dt>Best</dt><dd>11</dd></div><div><dt>Strength</dt><dd>64</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow" style="--c:#FF8A3D">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Walk 20 min</div></div>
+      <div class="crow-bot"><div class="crow-meta">2/4 this week · Streak 2W · best 4W</div><button class="btn crow-btn" data-mock="stamp">STAMP</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>finish lunch</p><p class="cue"><b>2 MIN</b>walk to the corner</p><dl class="stats"><div><dt>This week</dt><dd>2/4</dd></div><div><dt>Streak</dt><dd>2W</dd></div><div><dt>Best</dt><dd>4W</dd></div><div><dt>Strength</dt><dd>71</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow is-done" style="--c:#FF5C8A">
+      <div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Vitamins</div></div>
+      <div class="crow-bot"><div class="crow-meta">Streak 8 · best 8</div><button class="btn crow-btn" data-mock="stamp">STAMPED</button></div></div>
+      <div class="crow-body"><p class="cue"><b>AFTER I</b>eat breakfast</p><p class="cue"><b>2 MIN</b>one pill</p><dl class="stats"><div><dt>Streak</dt><dd>8</dd></div><div><dt>Best</dt><dd>8</dd></div><div><dt>Strength</dt><dd>95</dd></div></dl><div class="acts"><button class="btn" data-mock="skip">SKIP</button><button class="btn">NOTE</button></div>
+      <a class="openlink" href="#">Open habit page · history ›</a></div></article><h2 style="margin:1.75rem 0 .9rem">QUITTING</h2><article class="crow" style="--c:#FF8A3D"><div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Smoking</div></div>
+      <div class="crow-bot"><div class="crow-meta">0 days clean · <span class="qtag" data-count>0 today</span></div><button class="btn crow-btn" data-mock="toggle-btn">LOG</button></div></div>
+      <div class="crow-body"><p class="cue"><b>URGE? INSTEAD I</b>chew gum and walk around the block</p><p class="qstate clean">Clean so far today</p><div class="qitems"><div class="qrow"><span class="qn">Cigarettes</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div><div class="qrow"><span class="qn">Cigars</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div><div class="qrow"><span class="qn">Shisha</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div></div><a class="openlink" href="#">Open habit page · history ›</a></div></article><article class="crow" style="--c:#7AD7FF"><div class="crow-head" data-mock="toggle"><div class="crow-top"><span class="crow-tog">+</span><div class="crow-name">Soda</div></div>
+      <div class="crow-bot"><div class="crow-meta">10 days clean · <span class="qtag" data-count>0 today</span></div><button class="btn crow-btn" data-mock="single">+1</button></div></div>
+      <div class="crow-body"><p class="cue"><b>URGE? INSTEAD I</b>drink sparkling water</p><p class="qstate clean">Clean so far today</p><div class="qitems"><div class="qrow"><span class="qn">Soda</span><span class="qctl"><button class="btn sm" disabled>−</button><span class="qc">0</span><button class="btn sm" data-mock="inc">+1</button></span></div></div><a class="openlink" href="#">Open habit page · history ›</a></div></article></section>
+  </div>
+  <nav class="tabs"><a href="#" aria-current="page">TODAY</a><a href="#">HABITS</a><a href="#">REVIEW</a></nav>
+</div>
+<script>
+const wide = matchMedia('(min-width:760px)');
+function lengths() {
+  // how long each list is, in phone screens of 700px, scaled to 50 habits
+  const cols = [...document.querySelectorAll('.col')], shown = cols.filter(c => c.classList.contains('on'));
+  for (const col of cols) {
+    if (!wide.matches) cols.forEach(c => c.classList.toggle('on', c === col)); // measure each alone, at full width
+    const rows = col.querySelectorAll('.hcard, .crow'), n = rows.length;
+    const h = [...rows].reduce((a, r) => a + r.getBoundingClientRect().height + 16, 0);
+    col.querySelector('[data-len]').textContent = `${n} habits ≈ ${(h / 700).toFixed(1)} screens · 50 habits ≈ ${(h / n * 50 / 700).toFixed(0)} screens`;
+  }
+  if (!wide.matches) cols.forEach(c => c.classList.toggle('on', shown.includes(c)));
+}
+document.fonts.ready.then(lengths);
+document.addEventListener('change', e => {
+  if (e.target.name === 'view') for (const c of document.querySelectorAll('.col')) c.classList.toggle('on', c.id === 'col-' + e.target.value);
+  if (e.target.id === 'night') { if (e.target.checked) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme; }
+});
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-mock]'); if (!b) return; e.preventDefault();
+  const row = b.closest('.crow, .hcard'), m = b.dataset.mock;
+  const toggle = () => { row.classList.toggle('open'); row.querySelector('.crow-tog').textContent = row.classList.contains('open') ? '−' : '+'; };
+  if (m === 'stamp' || m === 'cstamp') { const d = row.classList.toggle('is-done'); row.classList.remove('is-skip'); b.textContent = d ? 'STAMPED' : 'STAMP'; }
+  else if (m === 'skip' || m === 'cskip') { const s = row.classList.toggle('is-skip'); row.classList.remove('is-done'); b.textContent = s ? 'SKIPPED' : 'SKIP';
+    const main = row.querySelector(m === 'skip' ? '.crow-btn' : '.stamp'); if (main) main.textContent = s ? (m === 'skip' ? 'SKIPPED' : 'STAMP') : 'STAMP'; }
+  else if (m === 'single') { const t = row.querySelector('[data-count]'); t.textContent = (parseInt(t.textContent) + 1) + ' today'; }
+  else if (m === 'inc') { const q = b.parentElement.querySelector('.qc'); q.textContent = +q.textContent + 1; }
+  else if (m === 'toggle' || m === 'toggle-btn') { if (m === 'toggle' && e.target.closest('.crow-btn')) return; toggle(); }
+});
+</script></body></html>

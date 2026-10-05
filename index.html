@@ -6,6 +6,13 @@
 <title>STAMP</title>
 <meta name="description" content="Local-first habit tracker. One tap to stamp.">
 <meta name="theme-color" content="#FFE14A">
+<script>
+// Apply the saved theme before first paint, so NIGHT doesn't flash light on launch.
+try {
+  const t = JSON.parse(localStorage.getItem('stamp-habits-v1') || '{}').settings?.theme;
+  if (t === 'dark' || (t === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.dataset.theme = 'dark';
+} catch (e) {}
+</script>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -17,11 +24,24 @@
   --page:#F3EFE4; --card:#FFFDF8; --ink:#111;
   --yellow:#FFE14A; --pink:#FF5C8A; --lime:#C6F54A; --sky:#7AD7FF; --orange:#FF8A3D;
   --skip:#BDB4A3; --skipbg:#E4DDCF; --line:#D6CEBE; --muted:#4A463F;
-  --b:3px solid #111; --sh:5px 5px 0 #111;
+  --on:#111;                                   /* text on accent-coloured blocks, both themes */
+  --hi-bg:#111; --hi-fg:var(--yellow);         /* active tab, selected chip */
+  --top-bg:var(--yellow); --mark-bg:#111; --mark-fg:var(--yellow);
+  --err:#B0003A;
+  --b:3px solid var(--ink); --sh:5px 5px 0 var(--ink);
   --display:'Archivo Black','Arial Black',Impact,sans-serif;
   --ui:'Space Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
   --mono:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
   color-scheme:light;
+}
+/* NIGHT: cream ink on near-black; accents keep their colour, text on them stays dark */
+:root[data-theme="dark"]{
+  --page:#121110; --card:#1E1C1A; --ink:#F3EFE4;
+  --skip:#6F685D; --skipbg:#2A2723; --line:#3B3732; --muted:#B5AD9F;
+  --hi-bg:var(--yellow); --hi-fg:#111;
+  --top-bg:#1E1C1A; --mark-bg:var(--yellow); --mark-fg:#111;
+  --err:#FF8FA9;
+  color-scheme:dark;
 }
 *{box-sizing:border-box;border-radius:0}
 html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
@@ -33,9 +53,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 #app{height:100dvh;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--page)}
 @media (min-width:530px){#app{border-left:var(--b);border-right:var(--b)}}
 
-.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--yellow);border-bottom:var(--b);
+.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--top-bg);color:var(--ink);border-bottom:var(--b);
   padding:max(.6rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) .6rem max(1rem,env(safe-area-inset-left))}
-.mark{display:inline-flex;align-items:center;min-height:44px;font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--ink);color:var(--yellow);padding:.35rem .55rem;text-decoration:none;transition:transform 60ms linear}
+.mark{display:inline-flex;align-items:center;min-height:44px;font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--mark-bg);color:var(--mark-fg);padding:.35rem .55rem;text-decoration:none;transition:transform 60ms linear}
 .mark:active{transform:translate(3px,3px)}
 .top .meta{text-align:right}
 
@@ -44,7 +64,7 @@ main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem max(1r
 .tabs{display:grid;grid-template-columns:repeat(3,1fr);border-top:var(--b);background:var(--card);padding-bottom:env(safe-area-inset-bottom)}
 .tabs a{min-height:3.4rem;display:grid;place-items:center;font:min(1rem,4.4vw)/1 var(--display);color:var(--ink);text-decoration:none;border-right:var(--b);padding:.5rem .25rem;letter-spacing:.02em}
 .tabs a:last-child{border-right:0}
-.tabs a[aria-current="page"]{background:var(--ink);color:var(--yellow)}
+.tabs a[aria-current="page"]{background:var(--hi-bg);color:var(--hi-fg)}
 
 h1{font:2rem/1 var(--display);text-transform:uppercase;margin:.25rem 0 .9rem;letter-spacing:-.01em;overflow-wrap:anywhere}
 h2{font:1.1rem/1.1 var(--display);text-transform:uppercase;margin:0 0 .75rem}
@@ -65,6 +85,10 @@ p{margin:.4rem 0}
 .btn.ink{background:var(--ink);color:var(--card)}
 .btn.y{background:var(--yellow)}
 .btn.pink{background:var(--pink)}
+.btn.y,.btn.pink,.banner,.toast,.qstate,.hcard.is-done,.acts .stamp{color:var(--on)}
+.hcard.is-done .stats div{color:var(--ink)}
+/* at night a fully lit card glares: stamped cards get a dark tint of their colour instead */
+:root[data-theme="dark"] .hcard.is-done{background:color-mix(in srgb,var(--c) 22%,var(--card));color:var(--ink)}
 .btn.sm{font-size:.85rem;padding:.5rem .7rem}
 .btn:disabled{opacity:.4;pointer-events:none}
 .btns{display:flex;flex-wrap:wrap;gap:.75rem;padding:0 5px 5px 0}
@@ -138,7 +162,7 @@ select{background-image:none;cursor:pointer}
 .chip{position:relative;display:inline-block}
 .chip input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
 .chip span{display:grid;place-items:center;min-width:44px;min-height:44px;padding:0 .75rem;border:var(--b);background:var(--card);box-shadow:var(--sh);font:.95rem/1 var(--display);text-transform:uppercase}
-.chip input:checked+span{background:var(--ink);color:var(--yellow)}
+.chip input:checked+span{background:var(--hi-bg);color:var(--hi-fg)}
 .chip input:focus-visible+span{outline:3px dashed var(--ink);outline-offset:3px}
 .chip input:active+span{transform:translate(3px,3px);box-shadow:none}
 .swatch span{width:3rem;background:var(--c)}
@@ -223,6 +247,7 @@ const DAY_SHORT = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 const MILESTONES = [7, 30, 100];
 const SOFT_CAP = 7;
 const BAD_IDS = new Set(['__proto__', 'constructor', 'prototype']);
+const THEMES = ['light', 'dark', 'auto'];
 
 /* ---------- dates (local, YYYY-MM-DD, ISO weeks start Monday) ---------- */
 const pad = n => String(n).padStart(2, '0');
@@ -252,7 +277,8 @@ const own = (o, k) => o && typeof o === 'object' && Object.prototype.hasOwnPrope
 /* ---------- storage ---------- */
 function normalize(raw) {
   if (!raw || typeof raw !== 'object' || !Array.isArray(raw.habits)) throw new Error('Expected an object with a "habits" array.');
-  const out = { v: 1, habits: [], logs: {}, settings: { boundary: clampInt(raw.settings?.boundary, 0, 6, 0) } };
+  const out = { v: 1, habits: [], logs: {}, settings: { boundary: clampInt(raw.settings?.boundary, 0, 6, 0),
+    theme: THEMES.includes(raw.settings?.theme) ? raw.settings.theme : 'light' } };
   const seen = new Set();
   const fallbackDay = keyOf(new Date());
   raw.habits.forEach((x, i) => {
@@ -304,7 +330,7 @@ function load() {
     const s = localStorage.getItem(KEY);
     if (s) return normalize(JSON.parse(s));
   } catch (e) { console.warn('STAMP: could not read saved data', e); }
-  return { v: 1, habits: [], logs: {}, settings: { boundary: 0 } };
+  return { v: 1, habits: [], logs: {}, settings: { boundary: 0, theme: 'light' } };
 }
 
 function save() {
@@ -803,7 +829,7 @@ function viewEdit(id) {
       <legend class="lab">Colour</legend>
       <div class="chips">${ACCENTS.map((c, i) => `<label class="chip swatch" style="--c:${c}"><input type="radio" name="color" value="${c}" ${v.color === c ? 'checked' : ''} aria-label="${ACCENT_NAMES[i]}"><span></span></label>`).join('')}</div>
     </fieldset>
-    <p class="meta" id="form-err" role="alert" style="color:#B0003A"></p>
+    <p class="meta" id="form-err" role="alert" style="color:var(--err)"></p>
     <div class="btns"><button class="btn y" type="submit">SAVE</button><button class="btn" type="button" data-act="back">CANCEL</button></div>
   </form>
   ${h ? `<section class="card"><h2>DELETE</h2><p class="muted">Archiving keeps the history. Delete removes the habit and every stamp, for good.</p>
@@ -826,6 +852,10 @@ function viewReview(T) {
       <p class="meta">${streak(h, T)} DAYS CLEAN · THIS WEEK ${tw} · LAST WEEK ${lw}${lw && tw !== lw ? ` · ${tw < lw ? 'DOWN' : 'UP'} ${Math.abs(tw - lw)}` : ''}</p>
       <div style="margin-top:.75rem">${countsTable(h, T)}</div></section>`;
   }).join('')}
+  <section class="card"><h2>THEME</h2>
+    <div class="chips">${[['light', 'LIGHT'], ['dark', 'NIGHT'], ['auto', 'AUTO']].map(([v, l]) => `<label class="chip"><input type="radio" name="theme" value="${v}" ${db.settings.theme === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>
+    <p class="meta muted" style="margin-top:.6rem">AUTO follows your phone's dark mode.</p>
+  </section>
   <section class="card"><h2>DAY BOUNDARY</h2>
     <label class="fld" style="margin-bottom:.4rem"><span class="lab">A new day starts at</span>
     <select id="boundary">${[0, 1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${db.settings.boundary === n ? 'selected' : ''}>${pad(n)}:00${n === 0 ? ' (midnight)' : ''}</option>`).join('')}</select></label>
@@ -880,6 +910,17 @@ sheet.addEventListener('close', () => {
   sheet.returnValue = '';
 });
 
+/* ---------- theme ---------- */
+const darkQuery = matchMedia('(prefers-color-scheme: dark)');
+function applyTheme() {
+  const t = db.settings.theme;
+  const dark = t === 'dark' || (t === 'auto' && darkQuery.matches);
+  if (dark) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
+  document.querySelector('meta[name="theme-color"]').content = dark ? '#1E1C1A' : '#FFE14A';
+}
+darkQuery.addEventListener('change', () => { if (db.settings.theme === 'auto') applyTheme(); });
+applyTheme();
+
 /* ---------- toast ---------- */
 const toastEl = document.getElementById('toast');
 let toastTimer;
@@ -915,6 +956,20 @@ function route() {
   return { name: 'today', tab: 'today' };
 }
 
+// Scroll memory per history entry: back/forward returns to where you were,
+// a fresh visit (tab, logo, link) starts at the top. New entries have no state,
+// so they get an id; entries we've left keep theirs and their scroll position.
+const scrollMemo = new Map();
+let currentEntry = null;
+function leaveAndArrive() {
+  if (currentEntry) scrollMemo.set(currentEntry, main.scrollTop);
+  let id = history.state?.stampEntry;
+  const y = id && scrollMemo.has(id) ? scrollMemo.get(id) : 0;
+  if (!id) { id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6); history.replaceState({ stampEntry: id }, ''); }
+  currentEntry = id;
+  return y;
+}
+
 function render() {
   const T = todayKey();
   lastT = T;
@@ -922,7 +977,7 @@ function render() {
   const rk = r.name + '/' + (r.arg || '');
   // forms keep their in-progress input: don't rebuild them on background re-renders
   if ((r.name === 'new' || r.name === 'edit') && rk === lastRouteKey) return;
-  const keep = rk === lastRouteKey ? main.scrollTop : 0;
+  const keep = rk === lastRouteKey ? main.scrollTop : leaveAndArrive();
   document.getElementById('hdate').textContent = fmt(T, { weekday: 'short', day: '2-digit', month: 'short' });
   document.querySelectorAll('.tabs a').forEach(a => {
     if (a.dataset.tab === r.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
@@ -1050,6 +1105,10 @@ document.addEventListener('change', e => {
     document.querySelector('#habit-form [name=cue]').placeholder = e.target.value === 'avoid' ? 'drink a glass of water' : 'pour my morning coffee';
     document.querySelector('#habit-form [name=name]').placeholder = e.target.value === 'avoid' ? 'Smoking' : 'Read';
   }
+  if (e.target.name === 'theme' && THEMES.includes(e.target.value)) {
+    db.settings.theme = e.target.value;
+    save(); applyTheme();
+  }
   if (e.target.id === 'boundary') {
     db.settings.boundary = clampInt(e.target.value, 0, 6, 0);
     save(); render();
@@ -1072,7 +1131,7 @@ function importJSON() {
   try { next = normalize(JSON.parse(ta.value)); }
   catch (e) { toast('Import failed: ' + (e instanceof SyntaxError ? 'not valid JSON.' : e.message)); return; }
   if (!confirm(`Replace everything on this device with ${next.habits.length} imported habit${next.habits.length === 1 ? '' : 's'}?`)) return;
-  db = next; save(); ta.value = '';
+  db = next; save(); applyTheme(); ta.value = '';
   toast(`Imported ${next.habits.length} habit${next.habits.length === 1 ? '' : 's'}.`);
   render();
 }
@@ -1083,7 +1142,7 @@ setInterval(tick, 60 * 1000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
 
 /* other tabs editing the same data */
-window.addEventListener('storage', e => { if (e.key === KEY) { db = load(); lastRouteKey = ''; render(); } });
+window.addEventListener('storage', e => { if (e.key === KEY) { db = load(); applyTheme(); lastRouteKey = ''; render(); } });
 
 render();
 
