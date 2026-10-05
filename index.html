@@ -35,7 +35,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 
 .top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--yellow);border-bottom:var(--b);
   padding:max(.6rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) .6rem max(1rem,env(safe-area-inset-left))}
-.mark{font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--ink);color:var(--yellow);padding:.35rem .55rem}
+.mark{display:inline-flex;align-items:center;min-height:44px;font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--ink);color:var(--yellow);padding:.35rem .55rem;text-decoration:none;transition:transform 60ms linear}
+.mark:active{transform:translate(3px,3px)}
 .top .meta{text-align:right}
 
 main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem max(1rem,env(safe-area-inset-right)) 2rem max(1rem,env(safe-area-inset-left))}
@@ -196,7 +197,7 @@ dialog::backdrop{background:#111;opacity:.55}
 <body>
 <div id="app">
   <header class="top">
-    <span class="mark">STAMP</span>
+    <a class="mark" href="#today" data-act="home" aria-label="STAMP, go to Today">STAMP</a>
     <span class="meta" id="hdate"></span>
   </header>
   <main id="view" tabindex="-1"></main>
@@ -957,6 +958,7 @@ document.addEventListener('click', e => {
     case 'day': if (h) openDay(h, b.dataset.d); break;
     case 'open': if (h) location.hash = '#habit/' + encodeURIComponent(h.id); break;
     case 'back': goBack(); break;
+    case 'home': if (route().name === 'today') main.scrollTo({ top: 0, behavior: 'smooth' }); break; // the link itself navigates
     case 'pause': if (h) { pause7(h); render(); } break;
     case 'resume': if (h) { resume(h); render(); } break;
     case 'archive': if (h) { h.archived = true; save(); render(); } break;
