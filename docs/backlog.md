@@ -19,7 +19,7 @@ device; Netlify stores only ciphertext.
   and key never leave the phone.
 - **Vault ID:** also derived from the passphrase, so there is no account, email
   or login.
-- **UI:** a BACKUP TO CLOUD section on REVIEW: set passphrase, back up (after
+- **UI:** a BACKUP TO CLOUD section on SETTINGS: set passphrase, back up (after
   changes, or by button), restore on a new device by entering the same passphrase.
 - **Costs the owner accepted in principle:**
   - A forgotten passphrase means the backup can't be recovered.
@@ -40,7 +40,7 @@ deployed, plus the owner's phone check. About 200–300 new lines:
 |---|---|
 | Netlify Function: save and load one ciphertext per vault in Blobs | Small, ~50 lines |
 | Client crypto: passphrase → key → encrypt/decrypt (WebCrypto) | Small to medium; must be exactly right |
-| BACKUP TO CLOUD on REVIEW: passphrase, back up, restore, last-backup time | Medium, mostly states and errors |
+| BACKUP TO CLOUD on SETTINGS: passphrase, back up, restore, last-backup time | Medium, mostly states and errors |
 | Deploy changes | Small, but new to this repo |
 | Testing: restore on a fresh origin, wrong passphrase, offline, large text | Most of the time |
 
@@ -52,6 +52,21 @@ deployed, plus the owner's phone check. About 200–300 new lines:
   junk. Cap the size and reject anything that isn't shaped like ciphertext.
 - **Testing** happens locally with `netlify dev`, then on the live site. There
   is no staging environment.
+
+## TODAY row sizing and visual distinction — parked (2026-10-06)
+
+The owner asked why TODAY's rows are bigger than HABITS' lines and wants to
+revisit it later. Not urgent.
+
+- **Why TODAY is bigger, by design:** it's the action screen (big STAMP target,
+  colour fill shows done at a glance, streak and best must be visible).
+- **Why it's bigger than needed:** the name always gets its own line so it reads
+  at the owner's 26px text, which wastes a line at normal size.
+- **Idea discussed, not built:** one line per habit when it fits
+  (`[+] NAME › STREAK · BEST [STAMP]`), wrapping to two lines only at large text
+  or for long names. About 70px per row at normal size instead of about 130.
+- **The owner also wants a different kind of visualisation** to tell TODAY and
+  HABITS apart, beyond size. Open: explore options in `.dev/mockups.html` first.
 
 ## Clean up shipping files
 

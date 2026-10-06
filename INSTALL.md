@@ -8,6 +8,6 @@
 4. **Install:** tap **Install app** if Chrome offers it, or open the ⋮ menu → **Install app** / **Add to Home screen**.
 5. Launch STAMP from the home screen. After the first load it works offline.
 
-Your data stays in that browser on that phone. Use **Review → Export JSON** for backups; **Import** restores them, including onto a new phone.
+Your data stays in that browser on that phone. Use **Settings (header button) → Export JSON** for backups; **Import** restores them, including onto a new phone.
 
 To ship an update, upload the folder again and bump `CACHE` in `sw.js` (e.g. `stamp-v2`). The new version shows on the next launch after that.

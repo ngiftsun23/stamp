@@ -93,12 +93,43 @@ smoking and drinking where several items belong together.
 
 ## Night mode
 
-- **LIGHT / NIGHT / AUTO on REVIEW, LIGHT by default,** so nothing changed for
-  existing data. AUTO follows the phone's dark mode, live.
+- **A moon/sun button in the header** flips light and night in one tap, as most
+  apps do. It replaced a LIGHT / NIGHT / AUTO setting on REVIEW, which the owner
+  didn't want; AUTO went with it. Light stays the default.
 - **At night the yellow header goes dark** and the logo inverts to yellow, to cut
   glare. Accent colours stay; text on them stays dark.
 - **Stamped cards get a dark tint of their colour at night** instead of a full
   bright fill, which glared in a dark room. The cream STAMPED button still shows
   the state.
 - **Done cells in the heatmap are cream at night,** following "done = ink".
+
+## Compact TODAY rows
+
+- **Why:** with full cards, 50 habits on TODAY were about 29 phone screens long.
+  Rows bring that to about 9. The owner compared both layouts side by side in
+  `.dev/mockups.html` (TODAY and HABITS, before and after) before choosing.
+- **The name gets its own line,** with streak and the button underneath. The
+  first mockup put them on one line, which squeezed names to a letter per line
+  at the owner's 26px text.
+- **Tapping a row expands it** instead of opening the habit page, so the page
+  is reached from the "Open habit page" link in the expanded card.
+- **Kept, not deleted:** the full-card version is the git tag
+  `today-full-cards`, chosen as the way to "remember the old setup". If the
+  owner wants both layouts inside the app, a FULL / COMPACT setting on REVIEW
+  is the next step.
+- **The name with "›" opens the habit page** on TODAY rows too; the rest of the
+  row expands. The owner preferred that to the "Open habit page" link that the
+  first build put inside the expanded card, which is now gone.
+- **The header date is capped to one line** (`min(.78rem, 3.4vw)`), because at
+  26px text it stacked to three lines next to the new night switch.
+
+## REVIEW vs SETTINGS
+
+- **REVIEW is insights only:** habit strength and the quit-habit summaries.
+- **SETTINGS holds controls:** day boundary, backup (export/import), install.
+  It opens from a sliders button in the header, next to the night switch, and
+  has no bottom tab: a fourth tab doesn't fit at the owner's text size, and
+  settings aren't a daily screen.
+- **The header logo is capped with `vw`** so the logo, date and both buttons
+  fit on one line at 26px text.
 

@@ -20,6 +20,20 @@ rm -rf /tmp/stamp-deploy && mkdir /tmp/stamp-deploy \
   && npx netlify-cli deploy --prod --dir=/tmp/stamp-deploy
 ```
 
+```bash
+# preview for the owner's phone away from home: same app plus the demo pages, at a fixed link
+rm -rf /tmp/stamp-preview && mkdir -p /tmp/stamp-preview/dev \
+  && cp index.html sw.js manifest.webmanifest icon-*.png /tmp/stamp-preview/ \
+  && cp .dev/*.html /tmp/stamp-preview/dev/ \
+  && npx netlify-cli deploy --dir=/tmp/stamp-preview --alias="$(cat .netlify/preview-alias)"
+```
+
+The preview lives at `https://<alias>--stamp-habits.netlify.app`; the alias
+(random suffix, so the link isn't guessable) is kept in the gitignored
+`.netlify/preview-alias`. Demo pages sit in `dev/` there because the CLI skips
+dot-folders. Use the preview for review before every production deploy when the
+owner isn't on the home network.
+
 **Never deploy with `--dir=.`**: it uploads every non-dot file in the repo,
 including these notes. If the app gains a file (a new icon, a second page), add
 it to the `cp` list above.
@@ -59,7 +73,7 @@ it to the `cp` list above.
 Inside `index.html`, in order: date helpers → `normalize()` (the single
 validator for stored and imported data) → habit logic (`dayStatus`, `weekInfo`,
 `streak`, `bestStreak`, `strength`) → mutations → views (`viewToday`,
-`viewHabits`, `viewDetail`, `viewEdit`, `viewReview`) → day sheet → routing →
+`viewHabits`, `viewDetail`, `viewEdit`, `viewReview`, `viewSettings`) → day sheet → routing →
 event delegation. Screens re-render by assigning `innerHTML`; every click is
 handled by one delegated listener that dispatches on `data-act`.
 
@@ -98,15 +112,23 @@ settings: { boundary: 0-6,    // before this hour, "today" is still yesterday
   including inside attributes. Uppercase *before* escaping, never after.
 - **IDs are validated** (`validId`) on load and import; `__proto__` and friends
   are rejected, since habit IDs become object keys.
-- **The habit name is the way into a habit's page.** It is a full-width button
-  with a "›" after it. The whole card is deliberately *not* tappable, because
-  stray taps near STAMP or +1 would navigate away.
+- **TODAY is a list of compact rows** (`todayRow`). Each row shows the name,
+  streak and its main action (STAMP, SKIPPED to undo a skip, +1 for a
+  single-item quit habit, LOG for a multi-item one). Tapping the name (with
+  its "›") opens the habit page; tapping anywhere else on the row, or its +,
+  expands today's full card. Open rows live in `openRows` for the session only.
+- **The previous TODAY with full cards is tagged `today-full-cards`** in git.
+  The owner asked to keep it reachable; restore from that tag if asked.
+- **On HABITS the name is the way into a habit's page,** as a full-width button
+  with a "›" after it.
 
 - **Night mode is a second set of CSS tokens** on `:root[data-theme="dark"]`.
   Use the tokens, never raw colours: `--ink`/`--card`/`--page` flip, `--on` is
   dark text on accent blocks in both themes, `--hi-bg`/`--hi-fg` mark the active
   tab and selected chips. A small script in `<head>` applies the saved theme
-  before first paint so NIGHT doesn't flash light.
+  before first paint so NIGHT doesn't flash light. The owner switches it with
+  the moon/sun button in the header (`toggleTheme`), not a setting. A stored
+  `auto` from before keeps following the phone until the button is first tapped.
 
 ## Gotchas
 

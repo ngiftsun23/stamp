@@ -53,11 +53,17 @@ button,input,select,textarea{font:inherit;color:inherit}
 #app{height:100dvh;max-width:520px;margin:0 auto;display:flex;flex-direction:column;background:var(--page)}
 @media (min-width:530px){#app{border-left:var(--b);border-right:var(--b)}}
 
-.top{display:flex;align-items:center;justify-content:space-between;gap:.75rem;background:var(--top-bg);color:var(--ink);border-bottom:var(--b);
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--top-bg);color:var(--ink);border-bottom:var(--b);
   padding:max(.6rem,env(safe-area-inset-top)) max(1rem,env(safe-area-inset-right)) .6rem max(1rem,env(safe-area-inset-left))}
-.mark{display:inline-flex;align-items:center;min-height:44px;font:1.35rem/1 var(--display);letter-spacing:.04em;background:var(--mark-bg);color:var(--mark-fg);padding:.35rem .55rem;text-decoration:none;transition:transform 60ms linear}
+.mark{display:inline-flex;align-items:center;min-height:44px;font:min(1.35rem,6vw)/1 var(--display);letter-spacing:.04em;background:var(--mark-bg);color:var(--mark-fg);padding:.35rem .55rem;text-decoration:none;transition:transform 60ms linear}
 .mark:active{transform:translate(3px,3px)}
-.top .meta{text-align:right}
+.top .meta{text-align:right;white-space:nowrap;font-size:min(.78rem,3.4vw)}
+.topr{display:flex;align-items:center;gap:10px}
+.themebtn.on{background:var(--hi-bg);color:var(--hi-fg)}
+.themebtn{flex:0 0 auto;display:grid;place-items:center;width:44px;height:44px;padding:0;background:var(--card);color:var(--ink);
+  border:var(--b);box-shadow:3px 3px 0 var(--ink);cursor:pointer;transition:transform 60ms linear}
+.themebtn:active{transform:translate(3px,3px);box-shadow:none}
+.themebtn svg{width:22px;height:22px}
 
 main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:1rem max(1rem,env(safe-area-inset-right)) 2rem max(1rem,env(safe-area-inset-left))}
 
@@ -123,15 +129,48 @@ p{margin:.4rem 0}
 .hcard.is-skip .acts [data-act="skip"]{background:var(--ink);color:var(--card)}
 .undo{margin:.6rem 0 0}
 .later{margin-top:.5rem}
+/* TODAY rows: name on its own line, then meta + main action; tap to expand */
+.crow{background:var(--card);border:var(--b);border-left:12px solid var(--c);box-shadow:var(--sh);margin:0 5px .9rem 0}
+.crow-head{padding:.6rem .6rem .6rem .7rem;cursor:pointer}
+.crow-top{display:flex;align-items:center;gap:.6rem}
+.crow-tog{flex:0 0 auto;display:grid;place-items:center;width:1.9rem;height:1.9rem;padding:0;border:var(--b);font:1rem/1 var(--display);background:var(--card);color:var(--ink);cursor:pointer}
+.crow-name{min-width:0;min-height:44px;padding:0;background:none;border:0;color:inherit;text-align:left;cursor:pointer;
+  font:1.08rem/1.1 var(--display);text-transform:uppercase;overflow-wrap:anywhere;transition:transform 60ms linear}
+.crow-name::after{content:"\203A" / "";margin-left:.4em}
+.crow-name:active{transform:translate(3px,3px)}
+.crow-bot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.5rem .75rem;margin-top:.45rem;padding-right:5px}
+.crow-meta{flex:1 1 7rem;font:500 .72rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.04em}
+.crow-btn{flex:0 0 auto;min-width:5.4rem;min-height:3rem;font-size:.9rem;padding:.5rem .6rem;background:var(--c);color:var(--on)}
+.crow.is-done{background:var(--c);color:var(--on)}
+.crow.is-done .crow-btn,.crow.is-skip .crow-btn{background:var(--ink);color:var(--card)}
+.crow.is-skip{background:var(--skipbg)}
+.crow .stats div{color:var(--ink);background:var(--card)}
+.crow-body{padding:.8rem .8rem 1rem;border-top:2px solid var(--line)}
+.crow.is-done .crow-body{border-top-color:currentColor}
+.crow-body .acts [aria-pressed="true"]{background:var(--ink);color:var(--card)}
+.qtag{display:inline-block;padding:0 .3rem;border:2px solid currentColor;margin-left:.2rem}
+:root[data-theme="dark"] .crow.is-done{background:color-mix(in srgb,var(--c) 22%,var(--card));color:var(--ink)}
 
 /* HABITS */
-.hrow .hname{font-size:1.2rem}
-.hrow{border-left-width:14px;border-left-color:var(--c)}
+/* a flat directory, deliberately unlike TODAY's rows: grouped boxes, thin dividers, actions behind a tap */
 .warn{background:var(--orange)}
-details.arch summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font:1rem/1 var(--display);text-transform:uppercase;list-style:none}
-details.arch summary::-webkit-details-marker{display:none}
-details.arch summary::before{content:"+";display:inline-grid;place-items:center;width:1.6rem;height:1.6rem;border:var(--b);margin-right:.6rem;font-size:1rem}
-details.arch[open] summary::before{content:"\2212"}
+.warnline{border-left:6px solid var(--orange);padding-left:.6rem;margin:.9rem 0 1.2rem}
+.dgroup{margin-bottom:1.4rem}
+.dh{font:1rem/1 var(--display);margin:0 0 .5rem}
+.dh span{font:500 .8rem var(--mono)}
+.dbox{border:var(--b);background:var(--card)}
+.drow{border-top:2px solid var(--line)}
+.drow:first-child{border-top:0}
+.drow.open{background:var(--page)}
+.dline{display:flex;flex-wrap:wrap;align-items:center;gap:.15rem .6rem;padding:.35rem .7rem;min-height:3rem;cursor:pointer}
+.ddot{flex:0 0 auto;width:.85rem;height:.85rem;background:var(--c);border:2px solid var(--ink)}
+.dname{min-height:44px;padding:0;background:none;border:0;color:inherit;text-align:left;cursor:pointer;
+  font:1rem/1.1 var(--display);text-transform:uppercase;overflow-wrap:anywhere;transition:transform 60ms linear}
+.dname::after{content:"\203A" / "";margin-left:.4em}
+.dname:active{transform:translate(3px,3px)}
+.dmeta{margin-left:auto;font:500 .7rem/1.3 var(--mono);text-transform:uppercase;letter-spacing:.04em;text-align:right}
+.dacts{display:flex;gap:8px;padding:.2rem 14px .8rem 10px}
+.dacts .btn{flex:1 1 0;min-width:0;white-space:nowrap;font-size:min(.75rem,3vw);padding:.5em .4em;letter-spacing:0}
 
 /* DETAIL */
 .ident{font:700 1.05rem/1.35 var(--ui);margin:.25rem 0 .5rem}
@@ -222,7 +261,9 @@ dialog::backdrop{background:#111;opacity:.55}
 <div id="app">
   <header class="top">
     <a class="mark" href="#today" data-act="home" aria-label="STAMP, go to Today">STAMP</a>
-    <span class="meta" id="hdate"></span>
+    <span class="topr"><span class="meta" id="hdate"></span>
+      <button class="themebtn" id="themebtn" data-act="theme" aria-label="Switch to night mode"></button>
+      <a class="themebtn" id="setbtn" href="#settings" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true"><path d="M3 6h11M18 6h3M3 12h3M10 12h11M3 18h13M20 18h1"/><rect x="14" y="4" width="4" height="4"/><rect x="6" y="10" width="4" height="4"/><rect x="16" y="16" width="4" height="4"/></svg></a></span>
   </header>
   <main id="view" tabindex="-1"></main>
   <nav class="tabs" aria-label="Sections">
@@ -581,41 +622,56 @@ function cueLines(h) {
   return out;
 }
 
-function habitCard(h, T) {
-  const L = getLog(h, T) || {};
+// TODAY rows: one compact line per habit with its main action; tap the row to
+// expand today's full card. Which rows are open lasts while the app is open.
+const openRows = new Set();
+
+function itemCounters(h, L) {
   const id = esc(h.id);
-  return `<article class="card hcard ${L.s ? 'is-' + L.s : ''}" style="--c:${h.color}">
-    <button class="hname" data-act="open" data-id="${id}">${esc(h.name)}</button>
-    ${cueLines(h)}
-    ${statTiles(h, T)}
-    ${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
-    <div class="acts">
-      <button class="btn stamp" data-act="stamp" data-id="${id}" aria-pressed="${L.s === 'done'}">${L.s === 'done' ? 'STAMPED' : 'STAMP'}</button>
-      <button class="btn" data-act="skip" data-id="${id}" aria-pressed="${L.s === 'skip'}">${L.s === 'skip' ? 'SKIPPED' : 'SKIP'}</button>
-      <button class="btn" data-act="note" data-id="${id}">NOTE</button>
-    </div>
-    ${L.s ? `<p class="meta undo">Tap ${L.s === 'done' ? 'STAMPED' : 'SKIPPED'} again to undo</p>` : ''}
-  </article>`;
+  return `<div class="qitems">${h.items.map(it => {
+    const c = L.c?.[it.id] || 0, iid = esc(it.id);
+    return `<div class="qrow"><span class="qn">${esc(it.name)}</span><span class="qctl">
+      <button class="btn sm" data-act="cnt" data-id="${id}" data-item="${iid}" data-delta="-1" aria-label="One less ${esc(it.name)}" ${c ? '' : 'disabled'}>−</button>
+      <span class="qc" aria-label="${c} today">${c}</span>
+      <button class="btn sm" data-act="cnt" data-id="${id}" data-item="${iid}" data-delta="1" aria-label="Log one ${esc(it.name)}">+1</button></span></div>`;
+  }).join('')}</div>`;
 }
 
-// Quit habit on TODAY: nothing to tap on a good day; +1 per item when it happens, − to undo.
-function quitCard(h, T) {
+function todayRow(h, T) {
   const L = getLog(h, T) || {};
-  const n = countOf(L), id = esc(h.id);
-  return `<article class="card hcard" style="--c:${h.color}">
-    <button class="hname" data-act="open" data-id="${id}">${esc(h.name)}</button>
-    ${cueLines(h)}
-    ${statTiles(h, T)}
-    <p class="qstate ${n ? 'slip' : 'clean'}">${n ? `Today: ${n} logged. Tomorrow starts clean.` : 'Clean so far today'}</p>
-    <div class="qitems">${h.items.map(it => {
-      const c = L.c?.[it.id] || 0, iid = esc(it.id);
-      return `<div class="qrow"><span class="qn">${esc(it.name)}</span><span class="qctl">
-        <button class="btn sm" data-act="cnt" data-id="${id}" data-item="${iid}" data-delta="-1" aria-label="One less ${esc(it.name)}" ${c ? '' : 'disabled'}>−</button>
-        <span class="qc" aria-label="${c} today">${c}</span>
-        <button class="btn sm" data-act="cnt" data-id="${id}" data-item="${iid}" data-delta="1" aria-label="Log one ${esc(it.name)}">+1</button></span></div>`;
-    }).join('')}</div>
-    ${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
-    <div class="acts"><button class="btn" data-act="note" data-id="${id}">NOTE</button></div>
+  const id = esc(h.id), open = openRows.has(h.id), name = esc(h.name);
+  const s = streak(h, T), b = bestStreak(h, T);
+  let meta, btn, body, state = '';
+  if (isAvoid(h)) {
+    const n = countOf(L);
+    meta = `${s} days clean · <span class="qtag">${n} today</span>`;
+    btn = h.items.length === 1
+      ? `<button class="btn crow-btn" data-act="cnt" data-id="${id}" data-item="${esc(h.items[0].id)}" data-delta="1" aria-label="Log one ${esc(h.items[0].name)}">+1</button>`
+      : `<button class="btn crow-btn" data-act="row" data-id="${id}" aria-expanded="${open}">${open ? 'CLOSE' : 'LOG'}</button>`;
+    body = `${cueLines(h)}${statTiles(h, T)}
+      <p class="qstate ${n ? 'slip' : 'clean'}">${n ? `Today: ${n} logged. Tomorrow starts clean.` : 'Clean so far today'}</p>
+      ${itemCounters(h, L)}${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
+      <div class="acts"><button class="btn" data-act="note" data-id="${id}">NOTE</button></div>`;
+  } else {
+    const u = isWeekly(h) ? 'W' : '';
+    const wi = isWeekly(h) ? weekInfo(h, monday(T), T) : null;
+    state = L.s || '';
+    meta = (wi ? `${wi.done}/${wi.quota} this week · ` : '') + `Streak ${s}${u} · best ${b}${u}`;
+    btn = state === 'skip'
+      ? `<button class="btn crow-btn" data-act="skip" data-id="${id}" aria-pressed="true">SKIPPED</button>`
+      : `<button class="btn crow-btn" data-act="stamp" data-id="${id}" aria-pressed="${state === 'done'}">${state === 'done' ? 'STAMPED' : 'STAMP'}</button>`;
+    body = `${cueLines(h)}${statTiles(h, T)}${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
+      <div class="acts"><button class="btn" data-act="skip" data-id="${id}" aria-pressed="${state === 'skip'}">${state === 'skip' ? 'SKIPPED' : 'SKIP'}</button>
+        <button class="btn" data-act="note" data-id="${id}">NOTE</button></div>
+      ${state ? `<p class="meta undo">Tap ${state === 'done' ? 'STAMPED' : 'SKIPPED'} again to undo</p>` : ''}`;
+  }
+  return `<article class="crow${state ? ' is-' + state : ''}${open ? ' open' : ''}" style="--c:${h.color}">
+    <div class="crow-head" data-act="row" data-id="${id}">
+      <div class="crow-top"><button class="crow-tog" data-act="row" data-id="${id}" aria-expanded="${open}" aria-label="${open ? 'Hide' : 'Show'} details for ${name}">${open ? '−' : '+'}</button>
+        <button class="crow-name" data-act="open" data-id="${id}">${name}</button></div>
+      <div class="crow-bot"><div class="crow-meta">${meta}</div>${btn}</div>
+    </div>
+    ${open ? `<div class="crow-body">${body}</div>` : ''}
   </article>`;
 }
 
@@ -634,7 +690,7 @@ function countsTable(h, T) {
 }
 
 function installCard(where) {
-  if (isStandalone()) return where === 'review' ? `<p class="meta">Installed. Running as an app.</p>` : '';
+  if (isStandalone()) return where === 'settings' ? `<p class="meta">Installed. Running as an app.</p>` : '';
   if (where === 'today' && (installState === 'pending' || hintDismissed())) return '';
   const steps = `<ol class="meta" style="padding-left:1.2rem;margin:.5rem 0 .75rem">
       <li>Open this page in Chrome on Android (HTTPS link).</li>
@@ -680,45 +736,49 @@ function viewToday(T) {
       ${slipped.length ? `<p>Slipped yesterday: <b>${slipped.map(h => esc(h.name)).join(', ')}</b>. One slip is an accident. Keep today clean.</p>` : ''}</section>`;
   }
   html += installCard('today');
-  if (due.length) html += due.map(h => habitCard(h, T)).join('');
+  if (due.length) html += due.map(h => todayRow(h, T)).join('');
   else if (!quits.length) html += `<section class="card"><h2>NOTHING DUE TODAY</h2><p>Rest is part of the schedule.</p></section>`;
-  if (quits.length) html += `<h2 style="margin:1.75rem 0 .9rem">QUITTING</h2>` + quits.map(h => quitCard(h, T)).join('');
+  if (quits.length) html += `<h2 style="margin:1.75rem 0 .9rem">QUITTING</h2>` + quits.map(h => todayRow(h, T)).join('');
   if (later.length) html += `<p class="meta later muted">Not due today: ${later.map(h => esc(h.name)).join(' · ')}</p>`;
   if (paused.length) html += `<p class="meta later muted">Paused: ${paused.map(h => `${esc(h.name)} (until ${fmt(pauseEnd(h, T), { day: 'numeric', month: 'short' })})`).join(' · ')}</p>`;
   return html;
 }
 
+// HABITS rows that show their actions; lasts while the app is open.
+const openDir = new Set();
+
+function dirRow(h, meta, acts) {
+  const id = esc(h.id), open = openDir.has(h.id);
+  return `<div class="drow${open ? ' open' : ''}" style="--c:${h.color}">
+    <div class="dline" data-act="drow" data-id="${id}" aria-expanded="${open}"><span class="ddot"></span>
+      <button class="dname" data-act="open" data-id="${id}">${esc(h.name)}</button><span class="dmeta">${meta}</span></div>
+    ${open ? `<div class="dacts">${acts}</div>` : ''}</div>`;
+}
+
 function viewHabits(T) {
-  const act = activeHabits();
-  const arch = db.habits.filter(h => h.archived);
+  const act = activeHabits(), arch = db.habits.filter(h => h.archived);
   let html = `<div class="spread"><h1>HABITS</h1><a class="btn y" href="#new">+ NEW</a></div>`;
-  if (act.length > SOFT_CAP) {
-    html += `<section class="banner warn"><h2>${act.length} ACTIVE</h2><p>A short list gets done; a long one becomes a wish list. Consider archiving the one you keep skipping.</p></section>`;
-  }
+  if (act.length > SOFT_CAP) html += `<p class="meta warnline">${act.length} active. A short list gets done; consider archiving the one you keep skipping.</p>`;
   if (!act.length) {
     html += `<section class="card empty"><h2>START WITH ONE</h2>
       <p>Pick one bad-day-proof habit: something so small you'd still do it sick, tired or travelling. One pushup. One page. One glass of water.</p>
       <p>Add a second habit when the first one is boring.</p>
       <div class="btns" style="margin-top:1rem"><a class="btn y" href="#new">+ NEW HABIT</a></div></section>`;
   }
-  for (const h of act) {
-    const id = esc(h.id), pe = pauseEnd(h, T);
-    html += `<article class="card hrow" style="--c:${h.color}">
-      <button class="hname" data-act="open" data-id="${id}">${esc(h.name)}</button>
-      <p class="meta">${schedText(h)}${pe ? ` · PAUSED UNTIL ${fmt(pe, { day: 'numeric', month: 'short' })}` : ''} · ${isAvoid(h) ? 'DAYS CLEAN' : 'STREAK'} ${streak(h, T)}${isWeekly(h) ? 'W' : ''}</p>
-      ${h.identity ? `<p class="muted">${esc(identText(h.identity))}</p>` : ''}
-      <div class="btns" style="margin-top:.75rem">
-        <a class="btn sm" href="#edit/${encodeURIComponent(h.id)}">EDIT</a>
-        ${pe ? `<button class="btn sm" data-act="resume" data-id="${id}">RESUME</button>` : `<button class="btn sm" data-act="pause" data-id="${id}">PAUSE 7D</button>`}
-        <button class="btn sm" data-act="archive" data-id="${id}">ARCHIVE</button>
-      </div></article>`;
-  }
-  if (arch.length) {
-    html += `<details class="arch"><summary>ARCHIVED (${arch.length})</summary>` + arch.map(h => `<article class="card hrow" style="--c:${h.color}">
-      <button class="hname" data-act="open" data-id="${esc(h.id)}">${esc(h.name)}</button>
-      <p class="meta">${schedText(h)} · ${totalDone(h)} STAMPS KEPT</p>
-      <div class="btns" style="margin-top:.75rem"><button class="btn sm" data-act="restore" data-id="${esc(h.id)}">RESTORE</button></div></article>`).join('') + `</details>`;
-  }
+  const btn = (act, id, label) => `<button class="btn sm" data-act="${act}" data-id="${esc(id)}">${label}</button>`;
+  const edit = h => `<a class="btn sm" href="#edit/${encodeURIComponent(h.id)}">EDIT</a>`;
+  const strengthOf = h => strength(h, T) ?? '—';
+  const group = (title, rows) => rows.length ? `<section class="dgroup"><h2 class="dh">${title} <span>· ${rows.length}</span></h2><div class="dbox">${rows.join('')}</div></section>` : '';
+  const live = act.filter(h => !pauseEnd(h, T)), paused = act.filter(h => pauseEnd(h, T));
+  html += group('BUILD', live.filter(h => !isAvoid(h)).map(h =>
+    dirRow(h, `${schedText(h)} · ${strengthOf(h)}`, edit(h) + btn('pause', h.id, 'PAUSE 7D') + btn('archive', h.id, 'ARCHIVE'))));
+  html += group('QUIT', live.filter(isAvoid).map(h =>
+    dirRow(h, `${h.items.length} ITEM${h.items.length === 1 ? '' : 'S'} · ${streak(h, T)} DAYS CLEAN`, edit(h) + btn('pause', h.id, 'PAUSE 7D') + btn('archive', h.id, 'ARCHIVE'))));
+  html += group('PAUSED', paused.map(h =>
+    dirRow(h, `UNTIL ${fmt(pauseEnd(h, T), { day: 'numeric', month: 'short' })}`, btn('resume', h.id, 'RESUME') + edit(h) + btn('archive', h.id, 'ARCHIVE'))));
+  html += group('ARCHIVED', arch.map(h =>
+    dirRow(h, `${totalDone(h)} STAMPS KEPT`, btn('restore', h.id, 'RESTORE') + btn('delete', h.id, 'DELETE'))));
+  if (db.habits.length) html += `<p class="meta muted">Tap a name to open the habit. Tap the rest of a line for its actions.</p>`;
   return html;
 }
 
@@ -852,10 +912,12 @@ function viewReview(T) {
       <p class="meta">${streak(h, T)} DAYS CLEAN · THIS WEEK ${tw} · LAST WEEK ${lw}${lw && tw !== lw ? ` · ${tw < lw ? 'DOWN' : 'UP'} ${Math.abs(tw - lw)}` : ''}</p>
       <div style="margin-top:.75rem">${countsTable(h, T)}</div></section>`;
   }).join('')}
-  <section class="card"><h2>THEME</h2>
-    <div class="chips">${[['light', 'LIGHT'], ['dark', 'NIGHT'], ['auto', 'AUTO']].map(([v, l]) => `<label class="chip"><input type="radio" name="theme" value="${v}" ${db.settings.theme === v ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>
-    <p class="meta muted" style="margin-top:.6rem">AUTO follows your phone's dark mode.</p>
-  </section>
+`;
+}
+
+function viewSettings() {
+  return `<div class="btns" style="margin-bottom:1rem"><button class="btn sm" data-act="back">BACK</button></div>
+  <h1>SETTINGS</h1>
   <section class="card"><h2>DAY BOUNDARY</h2>
     <label class="fld" style="margin-bottom:.4rem"><span class="lab">A new day starts at</span>
     <select id="boundary">${[0, 1, 2, 3, 4, 5, 6].map(n => `<option value="${n}" ${db.settings.boundary === n ? 'selected' : ''}>${pad(n)}:00${n === 0 ? ' (midnight)' : ''}</option>`).join('')}</select></label>
@@ -868,7 +930,7 @@ function viewReview(T) {
       <textarea id="import-text" spellcheck="false" placeholder='{"habits":[…],"logs":{…},"settings":{…}}'></textarea></label>
     <div class="btns"><button class="btn" data-act="import">IMPORT &amp; REPLACE</button></div>
   </section>
-  <section class="card"><h2>INSTALL</h2>${installCard('review')}</section>
+  <section class="card"><h2>INSTALL</h2>${installCard('settings')}</section>
   <p class="meta muted">STAMP · no account · no tracking · ${db.habits.length} habit${db.habits.length === 1 ? '' : 's'} stored locally</p>`;
 }
 
@@ -911,12 +973,23 @@ sheet.addEventListener('close', () => {
 });
 
 /* ---------- theme ---------- */
+// Header switch: moon in light mode, sun at night. A stored 'auto' keeps following the phone until first tapped.
+const SVG = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="square" aria-hidden="true">${d}</svg>`;
+const MOON = SVG('<path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/>');
+const SUN = SVG('<circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>');
 const darkQuery = matchMedia('(prefers-color-scheme: dark)');
 function applyTheme() {
   const t = db.settings.theme;
   const dark = t === 'dark' || (t === 'auto' && darkQuery.matches);
   if (dark) document.documentElement.dataset.theme = 'dark'; else delete document.documentElement.dataset.theme;
   document.querySelector('meta[name="theme-color"]').content = dark ? '#1E1C1A' : '#FFE14A';
+  const btn = document.getElementById('themebtn');
+  btn.innerHTML = dark ? SUN : MOON;
+  btn.setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to night mode');
+}
+function toggleTheme() {
+  db.settings.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  save(); applyTheme();
 }
 darkQuery.addEventListener('change', () => { if (db.settings.theme === 'auto') applyTheme(); });
 applyTheme();
@@ -950,6 +1023,7 @@ function route() {
   const a = arg ? decodeURIComponent(arg) : null;
   if (name === 'habits') return { name, tab: 'habits' };
   if (name === 'review') return { name, tab: 'review' };
+  if (name === 'settings') return { name, tab: null };
   if (name === 'habit' && a) return { name, arg: a, tab: 'habits' };
   if (name === 'edit' && a) return { name, arg: a, tab: 'habits' };
   if (name === 'new') return { name, tab: 'habits' };
@@ -979,12 +1053,14 @@ function render() {
   if ((r.name === 'new' || r.name === 'edit') && rk === lastRouteKey) return;
   const keep = rk === lastRouteKey ? main.scrollTop : leaveAndArrive();
   document.getElementById('hdate').textContent = fmt(T, { weekday: 'short', day: '2-digit', month: 'short' });
+  document.getElementById('setbtn').classList.toggle('on', r.name === 'settings');
   document.querySelectorAll('.tabs a').forEach(a => {
     if (a.dataset.tab === r.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   main.innerHTML =
     r.name === 'habits' ? viewHabits(T) :
     r.name === 'review' ? viewReview(T) :
+    r.name === 'settings' ? viewSettings() :
     r.name === 'habit' ? viewDetail(r.arg, T) :
     r.name === 'edit' ? viewEdit(r.arg) :
     r.name === 'new' ? viewEdit(null) :
@@ -1012,7 +1088,10 @@ document.addEventListener('click', e => {
     case 'note': if (h) { openDay(h, todayKey()); sheet.querySelector('textarea').focus(); } break;
     case 'day': if (h) openDay(h, b.dataset.d); break;
     case 'open': if (h) location.hash = '#habit/' + encodeURIComponent(h.id); break;
+    case 'drow': if (h) { if (openDir.has(h.id)) openDir.delete(h.id); else openDir.add(h.id); render(); } break;
+    case 'row': if (h) { if (openRows.has(h.id)) openRows.delete(h.id); else openRows.add(h.id); render(); } break;
     case 'back': goBack(); break;
+    case 'theme': toggleTheme(); break;
     case 'home': if (route().name === 'today') main.scrollTo({ top: 0, behavior: 'smooth' }); break; // the link itself navigates
     case 'pause': if (h) { pause7(h); render(); } break;
     case 'resume': if (h) { resume(h); render(); } break;
@@ -1020,8 +1099,8 @@ document.addEventListener('click', e => {
     case 'restore': if (h) { h.archived = false; save(); render(); } break;
     case 'delete':
       if (h && confirm(`Delete "${h.name}" and all its history? This can't be undone.`)) {
-        db.habits = db.habits.filter(x => x !== h); delete db.logs[h.id]; save();
-        location.replace('#habits');
+        db.habits = db.habits.filter(x => x !== h); delete db.logs[h.id]; openDir.delete(h.id); save();
+        if (route().name === 'habits') render(); else location.replace('#habits');
       }
       break;
     case 'sheet-s':
@@ -1104,10 +1183,6 @@ document.addEventListener('change', e => {
   if (e.target.name === 'kind') {
     document.querySelector('#habit-form [name=cue]').placeholder = e.target.value === 'avoid' ? 'drink a glass of water' : 'pour my morning coffee';
     document.querySelector('#habit-form [name=name]').placeholder = e.target.value === 'avoid' ? 'Smoking' : 'Read';
-  }
-  if (e.target.name === 'theme' && THEMES.includes(e.target.value)) {
-    db.settings.theme = e.target.value;
-    save(); applyTheme();
   }
   if (e.target.id === 'boundary') {
     db.settings.boundary = clampInt(e.target.value, 0, 6, 0);
