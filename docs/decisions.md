@@ -147,3 +147,25 @@ smoking and drinking where several items belong together.
   on light-coloured stamped rows. Days before a habit started are faint
   squares, not gaps, so every grid is a full rectangle.
 
+## Nothing moves when you tap (7 Oct 2026)
+
+- **The owner saw the screen jump** when logging a cigarette. Cause: logging or
+  stamping removed that habit from the DON'T MISS TWICE banner, the banner got
+  shorter, and everything below it, including the row being tapped, moved up.
+- **The banner is now decided by yesterday alone** and keeps the same lines all
+  day; a habit handled today is crossed out instead of removed.
+- **Rows keep their size on every tap:** one fixed button width, fixed-width
+  digits for streak and best, the undo line always reserved, and one-line quit
+  states ("Clean today" / "2 logged today").
+- **The year grid shows exactly 16 weeks** on any phone: squares size from the
+  card's width (container units); swiping back through the year still works.
+- **A full sweep (262 checks)** taps every kind of TODAY row (daily, weekdays,
+  weekly incl. completing the quota, in the banner, quit with several items or
+  one) folded and unfolded, at normal and 26px text, and requires that the tapped
+  control and every other row stay put. It found two more causes, now fixed:
+  - **The install hint arrived ~3 s after opening above the habits** and pushed
+    them down; it now sits at the bottom of TODAY (and of the empty state).
+  - **Folding a row near the bottom** made the page shorter than the scroll
+    position, so the browser pulled everything down. `render()` now pads the end
+    of the screen instead, keeping the scroll position.
+

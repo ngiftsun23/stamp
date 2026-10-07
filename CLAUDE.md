@@ -143,6 +143,12 @@ settings: { boundary: 0-6,    // before this hour, "today" is still yesterday
   the moon/sun button in the header (`toggleTheme`), not a setting. A stored
   `auto` from before keeps following the phone until the button is first tapped.
 
+- **Taps must never move the screen.** Anything above the rows (banner, hints)
+  keeps its size for the whole day, rows keep their height on every tap, and late
+  arrivals go at the bottom. The DON'T MISS TWICE banner is decided by yesterday
+  alone and crosses out handled habits. Re-check with a sweep that records each
+  row's position and height before and after every tap.
+
 ## Gotchas
 
 - **Renaming the Netlify site changes the origin** and strands every installed
