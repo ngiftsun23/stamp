@@ -1,6 +1,6 @@
 // STAMP service worker: cache the app shell, serve it offline.
 // Bump CACHE when shipping changes so old caches are dropped.
-const CACHE = 'stamp-v9';
+const CACHE = 'stamp-v10';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 

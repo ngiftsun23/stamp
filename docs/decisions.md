@@ -133,3 +133,17 @@ smoking and drinking where several items belong together.
 - **The header logo is capped with `vw`** so the logo, date and both buttons
   fit on one line at 26px text.
 
+## Year grid when a row is unfolded (7 Oct 2026)
+
+- **Three options were mocked up:** today's rows, a year grid on every row,
+  and the grid revealed only when a row is unfolded. The owner chose UNFOLD:
+  TODAY stays as short as before and the history is one tap away, at full
+  width (about 22 weeks on screen).
+- **Flame and crown replace "streak" and "best"** on every row.
+- **Day colours changed** from ink / pink / grey to green / red / ringed grey,
+  because the old set wasn't readable at a glance and pink is also a habit
+  colour. Applied to the habit page heatmap too, so the two never disagree.
+- **The grid sits on its own neutral panel**, because empty squares vanished
+  on light-coloured stamped rows. Days before a habit started are faint
+  squares, not gaps, so every grid is a full rectangle.
+

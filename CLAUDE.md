@@ -48,6 +48,13 @@ it to the `cp` list above.
 
 ## How the owner wants to work
 
+- **Keep the product document current.** "STAMP Product Direction" at
+  https://claude.ai/artifact/GcbvjMLrhG6LKmSW7N2Syk records what STAMP is, its
+  positioning, ideas under discussion, decisions and research, with a change
+  log. Prospective buyers may read it. After any product discussion or
+  decision, read it (Artifact tool, `action: "read"`), update it, republish to
+  the same URL, and rename it if the content outgrows the title.
+
 - **Show the running app before committing or deploying.** Serve it locally, load
   `.dev/demo.html`, and say where each new feature shows up in the demo data.
   Commit and deploy only once they've said it looks fine.
@@ -113,10 +120,16 @@ settings: { boundary: 0-6,    // before this hour, "today" is still yesterday
 - **IDs are validated** (`validId`) on load and import; `__proto__` and friends
   are rejected, since habit IDs become object keys.
 - **TODAY is a list of compact rows** (`todayRow`). Each row shows the name,
-  streak and its main action (STAMP, SKIPPED to undo a skip, +1 for a
+  a flame (current streak) and crown (best) instead of words, and its main action (STAMP, SKIPPED to undo a skip, +1 for a
   single-item quit habit, LOG for a multi-item one). Tapping the name (with
   its "›") opens the habit page; tapping anywhere else on the row, or its +,
-  expands today's full card. Open rows live in `openRows` for the session only.
+  expands today's full card, which opens with the habit's **year grid** (53
+  weeks, `yearGrid`, day letters pinned, swipe back from today). The grid is
+  only built for open rows. Open rows live in `openRows` for the session only.
+- **Day squares use semantic colours**, on TODAY and the habit page alike:
+  `--g-done` green, `--g-miss` red, `--g-skip` grey with a ring (skip and pause),
+  faint squares before a habit started. Never reuse the habit accent colours
+  for day states; pink is also a habit colour.
 - **The previous TODAY with full cards is tagged `today-full-cards`** in git.
   The owner asked to keep it reachable; restore from that tag if asked.
 - **On HABITS the name is the way into a habit's page,** as a full-width button

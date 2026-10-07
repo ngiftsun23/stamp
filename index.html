@@ -28,6 +28,7 @@ try {
   --hi-bg:#111; --hi-fg:var(--yellow);         /* active tab, selected chip */
   --top-bg:var(--yellow); --mark-bg:#111; --mark-fg:var(--yellow);
   --err:#B0003A;
+  --g-done:#1FA35C; --g-miss:#E0393E; --g-skip:#A8A196; --g-empty:#968E7F;  /* day squares: done, missed, skipped, empty */
   --b:3px solid var(--ink); --sh:5px 5px 0 var(--ink);
   --display:'Archivo Black','Arial Black',Impact,sans-serif;
   --ui:'Space Grotesk',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
@@ -41,6 +42,7 @@ try {
   --hi-bg:var(--yellow); --hi-fg:#111;
   --top-bg:#1E1C1A; --mark-bg:var(--yellow); --mark-fg:#111;
   --err:#FF8FA9;
+  --g-done:#3DDC84; --g-miss:#FF6B6B; --g-skip:#8C857A; --g-empty:#78726B;
   color-scheme:dark;
 }
 *{box-sizing:border-box;border-radius:0}
@@ -145,6 +147,27 @@ p{margin:.4rem 0}
 .crow.is-done .crow-btn,.crow.is-skip .crow-btn{background:var(--ink);color:var(--card)}
 .crow.is-skip{background:var(--skipbg)}
 .crow .stats div{color:var(--ink);background:var(--card)}
+.crow-top .stats2{margin-left:auto;display:flex;flex-wrap:wrap;justify-content:flex-end;gap:.2rem .7rem;align-items:center;font:1rem/1 var(--display)}
+.stats2 .st{display:inline-flex;align-items:center;gap:.25rem;white-space:nowrap}
+.sym{width:.85em;height:.85em;fill:currentColor;flex:0 0 auto}
+.wk{font:600 .72rem/1 var(--mono);border:2px solid currentColor;padding:.15rem .3rem;white-space:nowrap}
+.crow-bot{min-height:3rem}
+.crow-top{flex-wrap:wrap}
+/* year grid in an unfolded row: its own neutral panel, day letters pinned, swipe back up to a year */
+.yr{display:flex;gap:3px;background:var(--card);color:var(--ink);border:2px solid var(--ink);padding:4px 5px 3px 4px;margin-bottom:.8rem}
+.ydays,.ymonths{font:600 9px/10px var(--mono);color:inherit}
+.ydays{display:grid;grid-template-rows:repeat(8,10px);row-gap:2px;flex:0 0 auto}
+.ydays span{width:8px;text-align:center}
+.yscroll{flex:1;min-width:0;overflow-x:auto;scrollbar-width:thin;overscroll-behavior-x:contain;padding-bottom:3px}
+.ymonths{display:grid;grid-auto-flow:column;grid-auto-columns:10px;column-gap:2px;height:10px;margin-bottom:2px;white-space:nowrap}
+.mini{display:grid;grid-template-rows:repeat(7,10px);grid-auto-flow:column;grid-auto-columns:10px;gap:2px;width:max-content}
+.g{display:block;width:10px;height:10px;background:var(--card);outline:1px solid var(--g-empty);outline-offset:-1px}
+.g.g-done{background:var(--g-done);outline:1px solid var(--ink)}
+.g.g-miss{background:var(--g-miss);outline:1px solid var(--ink)}
+.g.g-skip{background:var(--g-skip);box-shadow:inset 0 0 0 2px var(--card);outline:1px solid var(--ink)}
+.g.g-off{background:transparent}
+.g.g-pre{background:transparent;opacity:.4}
+.g.t{outline:2px solid var(--ink);outline-offset:-2px}
 .crow-body{padding:.8rem .8rem 1rem;border-top:2px solid var(--line)}
 .crow.is-done .crow-body{border-top-color:currentColor}
 .crow-body .acts [aria-pressed="true"]{background:var(--ink);color:var(--card)}
@@ -178,12 +201,12 @@ p{margin:.4rem 0}
 .hm .dl{font:500 .62rem/1 var(--mono);padding-right:.3rem;text-align:right}
 .hm .mo{font:600 .6rem/1 var(--mono);white-space:nowrap;overflow:visible;height:1em;text-transform:uppercase}
 .cell{aspect-ratio:1;min-width:0;width:100%;padding:0;margin:0;border:2px solid var(--ink);background:var(--card);cursor:pointer;display:block}
-.cell.done,.cell.extra{background:var(--ink)}
-.cell.miss{background:var(--pink)}
-.cell.skip{background:var(--skip)}
+.cell.done,.cell.extra{background:var(--g-done)}
+.cell.miss{background:var(--g-miss)}
+.cell.skip,.cell.pause{background:var(--g-skip);box-shadow:inset 0 0 0 3px var(--card)}
 .cell.pause{border-style:dashed}
-.cell.off{border-color:var(--line)}
-.cell.pre,.cell.future{border-color:transparent;background:transparent;cursor:default}
+.cell.off{border-color:var(--g-empty)}
+.cell.pre,.cell.future{border-color:var(--g-empty);background:transparent;opacity:.4;cursor:default}
 .cell.today{outline:3px solid var(--ink);outline-offset:2px}
 .legend{display:flex;flex-wrap:wrap;gap:.4rem 1rem}
 .legend span{display:inline-flex;align-items:center;gap:.35rem}
@@ -637,41 +660,65 @@ function itemCounters(h, L) {
   }).join('')}</div>`;
 }
 
+const FLAME = '<svg class="sym" viewBox="0 0 14 16" aria-hidden="true"><polygon points="7,0 13,7 12,15 2,15 1,7 4,4 6,8"/></svg>';
+const CROWN = '<svg class="sym" viewBox="0 0 16 14" aria-hidden="true"><polygon points="1,13 1,3 5,7 8,1 11,7 15,3 15,13"/></svg>';
+const SQUARE = { done: 'done', extra: 'done', miss: 'miss', skip: 'skip', pause: 'skip', off: 'off', open: 'off', pre: 'pre', future: 'pre' };
+
+// A year of days for one habit: 53 week columns ending this week, today outlined.
+function yearGrid(h, T) {
+  const start = addDays(monday(T), -52 * 7);
+  const month = c => parse(addDays(start, c * 7)).getMonth();
+  let months = '', cells = '';
+  for (let c = 0; c < 53; c++) {
+    const show = c === 0 ? month(0) === month(2) : month(c) !== month(c - 1);
+    months += `<span>${show ? 'JFMAMJJASOND'[month(c)] : ''}</span>`;
+    for (let r = 0; r < 7; r++) {
+      const d = addDays(start, c * 7 + r);
+      cells += `<i class="g g-${SQUARE[dayStatus(h, d, T)]}${d === T ? ' t' : ''}"></i>`;
+    }
+  }
+  return `<div class="yr" role="img" aria-label="Last 12 months of ${esc(h.name)}"><div class="ydays" aria-hidden="true"><span></span>${[...'MTWTFSS'].map(x => `<span>${x}</span>`).join('')}</div>
+    <div class="yscroll"><div class="ymonths" aria-hidden="true">${months}</div><div class="mini">${cells}</div></div></div>`;
+}
+
 function todayRow(h, T) {
   const L = getLog(h, T) || {};
   const id = esc(h.id), open = openRows.has(h.id), name = esc(h.name);
-  const s = streak(h, T), b = bestStreak(h, T);
-  let meta, btn, body, state = '';
+  const s = streak(h, T), b = bestStreak(h, T), st = strength(h, T);
+  const u = isWeekly(h) ? 'W' : isAvoid(h) ? 'd' : '';
+  let tag = '', btn, body, state = '';
   if (isAvoid(h)) {
     const n = countOf(L);
-    meta = `${s} days clean · <span class="qtag">${n} today</span>`;
+    tag = `<span class="qtag">${n} today</span>`;
     btn = h.items.length === 1
       ? `<button class="btn crow-btn" data-act="cnt" data-id="${id}" data-item="${esc(h.items[0].id)}" data-delta="1" aria-label="Log one ${esc(h.items[0].name)}">+1</button>`
       : `<button class="btn crow-btn" data-act="row" data-id="${id}" aria-expanded="${open}">${open ? 'CLOSE' : 'LOG'}</button>`;
-    body = `${cueLines(h)}${statTiles(h, T)}
+    body = `${cueLines(h)}
       <p class="qstate ${n ? 'slip' : 'clean'}">${n ? `Today: ${n} logged. Tomorrow starts clean.` : 'Clean so far today'}</p>
       ${itemCounters(h, L)}${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
       <div class="acts"><button class="btn" data-act="note" data-id="${id}">NOTE</button></div>`;
   } else {
-    const u = isWeekly(h) ? 'W' : '';
     const wi = isWeekly(h) ? weekInfo(h, monday(T), T) : null;
+    if (wi) tag = `<span class="wk" title="This week">${wi.done}/${wi.quota}</span>`;
     state = L.s || '';
-    meta = (wi ? `${wi.done}/${wi.quota} this week · ` : '') + `Streak ${s}${u} · best ${b}${u}`;
     btn = state === 'skip'
       ? `<button class="btn crow-btn" data-act="skip" data-id="${id}" aria-pressed="true">SKIPPED</button>`
       : `<button class="btn crow-btn" data-act="stamp" data-id="${id}" aria-pressed="${state === 'done'}">${state === 'done' ? 'STAMPED' : 'STAMP'}</button>`;
-    body = `${cueLines(h)}${statTiles(h, T)}${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
+    body = `${cueLines(h)}${L.n ? `<p class="note">${esc(L.n)}</p>` : ''}
       <div class="acts"><button class="btn" data-act="skip" data-id="${id}" aria-pressed="${state === 'skip'}">${state === 'skip' ? 'SKIPPED' : 'SKIP'}</button>
         <button class="btn" data-act="note" data-id="${id}">NOTE</button></div>
       ${state ? `<p class="meta undo">Tap ${state === 'done' ? 'STAMPED' : 'SKIPPED'} again to undo</p>` : ''}`;
   }
+  const label = `${isAvoid(h) ? 'Days clean' : 'Streak'} ${s}, best ${b}`;
   return `<article class="crow${state ? ' is-' + state : ''}${open ? ' open' : ''}" style="--c:${h.color}">
     <div class="crow-head" data-act="row" data-id="${id}">
       <div class="crow-top"><button class="crow-tog" data-act="row" data-id="${id}" aria-expanded="${open}" aria-label="${open ? 'Hide' : 'Show'} details for ${name}">${open ? '−' : '+'}</button>
-        <button class="crow-name" data-act="open" data-id="${id}">${name}</button></div>
-      <div class="crow-bot"><div class="crow-meta">${meta}</div>${btn}</div>
+        <button class="crow-name" data-act="open" data-id="${id}">${name}</button>
+        <div class="stats2" role="img" aria-label="${label}"><span class="st">${FLAME}${s}${u}</span><span class="st">${CROWN}${b}${u}</span></div></div>
+      <div class="crow-bot"><div class="crow-meta">${tag}</div>${btn}</div>
     </div>
-    ${open ? `<div class="crow-body">${body}</div>` : ''}
+    ${open ? `<div class="crow-body">${yearGrid(h, T)}${body}
+      <p class="meta muted" style="margin-top:.6rem">Strength ${st ?? '—'} · last 6 weeks</p></div>` : ''}
   </article>`;
 }
 
@@ -1067,7 +1114,10 @@ function render() {
     viewToday(T);
   main.scrollTop = keep;
   lastRouteKey = rk;
-  if (r.name === 'today') quitMilestones(T);
+  if (r.name === 'today') {
+    main.querySelectorAll('.yscroll').forEach(x => { x.scrollLeft = x.scrollWidth; });
+    quitMilestones(T);
+  }
 }
 
 function goBack(fallback = '#habits') {
